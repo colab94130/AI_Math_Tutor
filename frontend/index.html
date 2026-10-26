@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Math Tutor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+   <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+    </script> 
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { --primary-green: #2E7D32; --input-bg: #E8F5E9; }
+        body { height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-family: sans-serif; }
+        .navbar { height: 70px; border-bottom: 1px solid #eee; }
+        .content-wrapper { flex: 1; overflow-y: auto; padding: 20px; }
+        .welcome-section { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+        .result-card, .log-container { max-width: 900px; margin: 0 auto 100px; background: var(--input-bg); border-radius: 25px; padding: 35px; display: none; }
+        
+        /* 智慧出題相關樣式 */
+        .quiz-container { max-width: 900px; margin: 0 auto 120px; background: var(--input-bg); border-radius: 25px; padding: 35px; display: none; }
+        .sticky-bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px 25px; border-top: 2px solid #ddd; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; display: none; }
+        .quiz-card { background: white; border: 1px solid #ccc; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .quiz-meta { font-size: 0.85rem; color: #fff; background: var(--primary-green); padding: 4px 10px; border-radius: 12px; display: inline-block; margin-bottom: 10px; }
+        
+        .bottom-container { background: white; padding: 25px; border-top: 1px solid #eee; }
+        .input-capsule { max-width: 1000px; margin: 0 auto; background: var(--input-bg); border-radius: 40px; padding: 12px 30px; display: flex; align-items: center; }
+        textarea { flex: 1; background: transparent; border: none; outline: none; font-size: 1.2rem; resize: none; }
+        .icon-btn { color: var(--primary-green); cursor: pointer; font-size: 2rem !important; margin: 0 10px; }
+        .user-pill { display: none; background: var(--input-bg); padding: 5px 15px; border-radius: 20px; color: var(--primary-green); font-weight: bold; }
+        #loader { text-align: center; color: var(--primary-green); display: none; margin-bottom: 8px; }
+        .history-thumbnail { max-height: 100px; max-width: 100%; object-fit: contain; cursor: pointer; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; }
+        .modal-img-fullscreen { max-width: 100%; max-height: 80vh; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg px-4">
+    <a class="navbar-brand d-flex align-items-center" href="#" onclick="showPage('home')">
+        <span class="material-icons me-2" style="color: var(--primary-green);">auto_stories</span>
+        <b style="color: var(--primary-green);">AI Math Tutor</b>
+    </a>
+    <div class="ms-auto d-flex align-items-center">
+        <button class="btn btn-link text-success" onclick="checkLoginForQuiz()">智慧出題</button>
+        <button class="btn btn-link text-success ms-2" onclick="checkLoginForLog()">學習日誌</button>
+        <button id="loginBtn" class="btn btn-success ms-3" data-bs-toggle="modal" data-bs-target="#loginModal">登入</button>
+        <div id="userPill" class="user-pill ms-3"><span id="navUserName"></span></div>
+    </div>
+</nav>
+
+<div class="content-wrapper" id="scroll-area">
+    <div id="home-page" class="welcome-section">
+        <h1 id="userGreeting" class="display-3 fw-bold" style="color: var(--primary-green);">您好！</h1>
+        <p class="fs-4 text-secondary">請輸入題目或點擊「+」拍照解題</p>
+    </div>
+    
+    <div id="result-page" class="result-card">
+        <h3 style="color: var(--primary-green);">解題報告</h3>
+        
+        <div id="translatedEq" class="text-secondary small mb-3"></div>
+        <hr>
+        <div id="explanationText" style="line-height: 1.8; white-space: pre-wrap;"></div>
+    </div>
+    
+    <div id="log-page" class="log-container">
+        <h3 style="color: var(--primary-green);" class="mb-4">您的學習紀錄</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <div id="quiz-page" class="quiz-container">
+        <h3 style="color: var(--primary-green);" class="mb-4">智慧出題系統</h3>
+        
+        <div id="quiz-step-1">
+            <p class="text-secondary mb-3">請勾選您想複習的歷史題目概念：</p>
+            <div id="quizHistoryList"></div>
+        </div>
+
+        <div id="quiz-step-2" style="display:none;">
+            <p class="text-secondary mb-3">為您精選的挑戰題：</p>
+            <div id="quizQuestionsArea"></div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-container" id="bottom-bar">
+    <div id="loader">思考中...</div>
+    <div class="input-capsule">
+        <span class="material-icons icon-btn" onclick="document.getElementById('fileInput').click()">add</span>
+        <input type="file" id="fileInput" style="display:none;" accept="image/*" onchange="uploadImage(this)">
+        <textarea id="mathInput" rows="1" placeholder="輸入題目..."></textarea>
+        <span class="material-icons icon-btn" onclick="askTutor()">send</span>
+    </div>
+</div>
+
+<div id="quiz-bottom-bar" class="sticky-bottom-bar">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <button id="quizConfirmBtn" class="btn btn-success w-100 fs-5 rounded-pill" onclick="generateQuiz()">確定出題</button>
+        <button id="quizSubmitBtn" class="btn btn-primary w-100 fs-5 rounded-pill" style="display:none;" onclick="submitQuiz()">送出解答給 AI 批改</button>
+    </div>
+</div>
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-transparent border-0">
+      <div class="modal-header border-0">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="fullSizeImage" src="" class="modal-img-fullscreen" alt="Full size image">
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="loginModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4" style="border-radius:20px;">
+    <h5 class="fw-bold text-success mb-3">會員登入</h5>
+    <input type="text" id="loginUser" class="form-control mb-2" placeholder="帳號">
+    <input type="password" id="loginPass" class="form-control mb-3" placeholder="密碼">
+    <button class="btn btn-success w-100 mb-2" onclick="handleLogin()">登入</button>
+    <button class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#regModal">註冊</button>
+</div></div></div>
+
+<div class="modal fade" id="regModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content p-4" style="border-radius:20px;">
+    <h5 class="fw-bold text-success mb-3">註冊新帳號</h5>
+    <input type="text" id="regUser" class="form-control mb-2" placeholder="帳號">
+    <input type="password" id="regPass" class="form-control mb-2" placeholder="密碼">
+    <input type="text" id="regName" class="form-control mb-3" placeholder="姓名">
+    <button class="btn btn-success w-100" onclick="handleRegister()">註冊</button>
+</div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let loggedInUser = null;
+    let currentImageUrl = "";
+    let renderTimer = null;
+    document.addEventListener("DOMContentLoaded", () => {
+        const savedUser = sessionStorage.getItem("loggedInUser");
+        const savedName = sessionStorage.getItem("navUserName");
+        if (savedUser) {
+            loggedInUser = savedUser;
+            document.getElementById('userGreeting').innerText = "您好，" + savedName;
+            document.getElementById('navUserName').innerText = savedName;
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('userPill').style.display = 'block';
+        }
+    });
+    function showPage(p) {
+        document.getElementById('home-page').style.display = p==='home'?'flex':'none';
+        document.getElementById('result-page').style.display = p==='result'?'block':'none';
+        document.getElementById('log-page').style.display = p==='log'?'block':'none';
+        document.getElementById('quiz-page').style.display = p==='quiz'?'block':'none';
+        
+        document.getElementById('bottom-bar').style.display = p==='home'||p==='result'?'block':'none';
+        document.getElementById('quiz-bottom-bar').style.display = p==='quiz'?'block':'none';
+    }
+
+    async function handleLogin() {
+        const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value;
+        const res = await fetch("http://127.0.0.1:8000/login", { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p}) });
+        const d = await res.json();
+        if(res.ok) { 
+            loggedInUser = u; 
+
+            sessionStorage.setItem("loggedInUser", u);
+            sessionStorage.setItem("navUserName", d.name);
+
+            document.getElementById('userGreeting').innerText = "您好，"+d.name;
+            document.getElementById('navUserName').innerText = d.name;
+            document.getElementById('loginBtn').style.display='none';
+            document.getElementById('userPill').style.display='block';
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+        } else { alert("登入失敗"); }
+    }
+
+    async function handleRegister() {
+        const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value;
+        const res = await fetch("http://127.0.0.1:8000/register", { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p, name:n}) });
+        if(res.ok) { alert("註冊成功"); bootstrap.Modal.getInstance(document.getElementById('regModal')).hide(); }
+    }
+
+    function checkLoginForLog() { if(!loggedInUser) alert("請先登入"); else loadHistory(); }
+    function checkLoginForQuiz() { if(!loggedInUser) alert("請先登入"); else loadQuizHistory(); }
+
+    function renderMath() {
+        if (window.MathJax) {
+            MathJax.typesetClear(); // 清除先前的渲染紀錄，避免殘影
+            MathJax.typesetPromise().catch((err) => console.log(err.message));
+        }
+    }
+
+    // 輔助函式：點擊圖片時放大
+    function showFullImage(src) {
+        document.getElementById('fullSizeImage').src = src;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+async function loadHistory() {
+        showPage('log');
+        const res = await fetch(`http://127.0.0.1:8000/get_history/${loggedInUser}`);
+        const data = await res.json();
+        
+        document.getElementById('logContent').innerHTML = data.reverse().map(h => {
+            // 如果有 image_url，就產出 <img> 標籤
+            const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
+            return `
+            <div class="p-3 mb-3 bg-white rounded shadow-sm border-start border-success border-4">
+                <small class="text-secondary">${h.time}</small>
+                <div class="mt-1"><strong>問：</strong>${h.query}</div>
+                ${imgHtml}
+                <div class="text-danger mt-2"><strong>答：</strong>${h.answer}</div>
+                <details class="mt-1"><summary style="cursor:pointer">查看步驟</summary><div class="small mt-2" style="white-space: pre-wrap;">${h.explanation}</div></details>
+            </div>
+            `;
+        }).join('');
+        
+        // 渲染完 HTML 後，呼叫 MathJax
+        renderMath();
+    }
+async function loadQuizHistory() {
+        showPage('quiz');
+        document.getElementById('quiz-step-1').style.display = 'block';
+        document.getElementById('quiz-step-2').style.display = 'none';
+        document.getElementById('quizConfirmBtn').style.display = 'block';
+        document.getElementById('quizSubmitBtn').style.display = 'none';
+
+        const res = await fetch(`http://127.0.0.1:8000/get_history/${loggedInUser}`);
+        const data = await res.json();
+        
+        document.getElementById('quizHistoryList').innerHTML = data.reverse().map((h, index) => {
+             const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
+             return `
+            <div class="form-check p-3 mb-3 bg-white rounded shadow-sm border">
+                <input class="form-check-input ms-1 mt-2" type="checkbox" value="國一下-1-1重點一" id="hist_${index}" style="transform: scale(1.5);">
+                <label class="form-check-label ms-3 w-100" for="hist_${index}">
+                    <div class="quiz-meta">歷史提問</div>
+                    <div class="mt-1 text-dark">${h.query.substring(0, 50)}${h.query.length > 50 ? '...' : ''}</div>
+                    ${imgHtml}
+                </label>
+            </div>
+            `;
+        }).join('');
+        
+        renderMath();
+    }
+
+    async function generateQuiz() {
+        const checkedBoxes = document.querySelectorAll('#quizHistoryList input:checked');
+        if(checkedBoxes.length === 0) { alert("請至少勾選一個概念進行複習！"); return; }
+        
+        let categories = Array.from(checkedBoxes).map(cb => cb.value);
+
+        document.getElementById('quiz-step-1').style.display = 'none';
+        document.getElementById('quizConfirmBtn').style.display = 'none';
+        
+        const res = await fetch("http://127.0.0.1:8000/generate_quiz", {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ categories: categories })
+        });
+        const questions = await res.json();
+
+        // 💡 調整重點：為文字、答案框、檔案框加上帶有唯一索引 [i] 的 id 屬性
+        document.getElementById('quizQuestionsArea').innerHTML = questions.map((q, i) => `
+            <div class="quiz-card" id="qcard_${i}">
+                <div class="quiz-meta">${q.category}</div>
+                <p class="fs-5" id="quiz_q_${i}">${q.question_text}</p>
+                <textarea class="form-control mb-2" id="quiz_ans_${i}" rows="3" placeholder="請在此輸入您的計算過程與答案..."></textarea>
+                <input type="file" class="form-control form-control-sm text-secondary" id="quiz_file_${i}" accept="image/*">
+            </div>
+        `).join('');
+
+        document.getElementById('quiz-step-2').style.display = 'block';
+        document.getElementById('quizSubmitBtn').style.display = 'block';
+        document.getElementById('scroll-area').scrollTop = 0;
+    }
+
+    // 🧩 拼圖三修正：重構後的 FormData 多模態混合上傳邏輯
+    async function submitQuiz() {
+        const cards = document.querySelectorAll('.quiz-card');
+        const formData = new FormData();
+        const answersArray = [];
+        
+        // 逐一掃描考卷卡片，打包文字與真實圖片檔案
+        for (let i = 0; i < cards.length; i++) {
+            const qText = document.getElementById(`quiz_q_${i}`).innerText;
+            const ansText = document.getElementById(`quiz_ans_${i}`).value;
+            const fileInput = document.getElementById(`quiz_file_${i}`);
+            
+            // 收集文字骨架
+            answersArray.push({
+                question_text: qText,
+                text_answer: ansText
+            });
+            
+            // 檢查若此題有選擇圖片，則將其附加進 Form 欄位中 (對應後端的 file_0, file_1, file_2)
+            if (fileInput && fileInput.files[0]) {
+                formData.append(`file_${i}`, fileInput.files[0]);
+            }
+        }
+        
+        // 將文字矩陣轉成字串塞入
+        formData.append("answers", JSON.stringify(answersArray));
+
+        showPage('result');
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('explanationText').innerText = "AI 老師正在用心閱卷中，包含您的手寫計算過程照片...\n\n";
+        
+        // 注意：發送 FormData 時，千萬不可以手動手動設定 'Content-Type'，瀏覽器會自動附加正確的 boundary 邊界線！
+        const res = await fetch("http://127.0.0.1:8000/grade_quiz", { 
+            method: 'POST', 
+            body: formData 
+        });
+        
+        await handleStream(res, "【智慧測驗批改（包含手寫圖片）】");
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    // Streaming 回傳邏輯
+// 修改：處理串流，並在結束時儲存 image_url，最後觸發 MathJax 渲染
+    async function handleStream(res, originalQuery) {
+        const reader = res.body.getReader(), decoder = new TextDecoder();
+        let fullExp = "", finalAns = "";
+        
+        while(true) {
+            const {done, value} = await reader.read(); if(done) break;
+            const chunk = decoder.decode(value, {stream: true});
+            
+            if(chunk.includes("--SEP--")) {
+                const parts = chunk.split("--SEP--\n");
+                const m = JSON.parse(parts[0]);
+                finalAns = m.answer;
+                if(m.image_url) {
+                    currentImageUrl = m.image_url;
+                }
+                
+                document.getElementById('translatedEq').innerText = m.translated_eq;
+                fullExp += (parts[1] || "");
+            } else { 
+                fullExp += chunk; 
+            }
+            
+            // 1. 先將最新收到的純文字更新到畫面上
+            document.getElementById('explanationText').innerHTML = marked.parse(fullExp);
+            document.getElementById('scroll-area').scrollTop = document.getElementById('scroll-area').scrollHeight;
+
+            // 2. 動態即時渲染邏輯：計算目前字串中出現了幾個 $ 符號
+            const dollarCount = (fullExp.match(/\$/g) || []).length;
+            
+            // 3. 如果 $ 是偶數（代表沒有寫到一半、斷掉的數學式），才允許觸發 MathJax 轉換
+            if (dollarCount % 2 === 0) {
+                clearTimeout(renderTimer);
+                // 稍微延遲 150 毫秒再渲染，避免模型吐字太快導致畫面閃爍卡頓
+                renderTimer = setTimeout(() => {
+                    renderMath();
+                }, 150); 
+            }
+        }
+        
+        // 串流完全結束後，做最後一次確保渲染
+        renderMath();
+        
+        if(loggedInUser) {
+            fetch("http://127.0.0.1:8000/save_history", {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    username: loggedInUser, 
+                    query: originalQuery, 
+                    answer: finalAns, 
+                    explanation: fullExp,
+                    image_url: currentImageUrl 
+                })
+            });
+            currentImageUrl = ""; 
+        }
+    }
+async function askTutor() {
+        const q = document.getElementById('mathInput').value; if(!q) return;
+        currentImageUrl = ""; // 清空之前的圖片路徑
+        showPage('result'); document.getElementById('loader').style.display = 'block';
+        document.getElementById('explanationText').innerText = "";
+        const res = await fetch("http://127.0.0.1:8000/solve", { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query:q}) });
+        await handleStream(res, q);
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('mathInput').value = "";
+    }
+
+    async function uploadImage(input) {
+        if (!input.files[0]) return;
+        const formData = new FormData(); formData.append("file", input.files[0]);
+        currentImageUrl = ""; // 清空之前的圖片路徑
+        showPage('result'); document.getElementById('loader').style.display = 'block';
+        document.getElementById('explanationText').innerText = "正在辨識算式...";
+        const res = await fetch("http://127.0.0.1:8000/ocr_solve", { method: 'POST', body: formData });
+        await handleStream(res, "[圖片題目]");
+        document.getElementById('loader').style.display = 'none';
+        input.value = "";
+    }
+</script>
+</body>
+</html>
