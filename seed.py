@@ -4,73 +4,194 @@ def seed_data():
     db = SessionLocal()
     
     if db.query(Problem).count() > 0:
-        print("資料庫已有題目，跳過匯入。")
+        print("資料庫已有題目，跳過匯入。若要重新匯入，請先清空 Problem 資料表。")
         db.close()
         return
 
-    # 建立「01 乘法公式」的 10 題標準化題庫
     problems_data = [
+        # ==========================================
+        # 1-1 乘法公式 (30題計算題 - 附完整詳解)
+        # ==========================================
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "展開 $(3x + 2)^2$ 的結果為何？\n(A) $9x^2 + 4$\n(B) $9x^2 + 6x + 4$\n(C) $9x^2 + 12x + 4$\n(D) $3x^2 + 12x + 4$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用分配律，計算 $21 \\times 104$ 的值為何？",
+            "detailed_solution": "利用分配律展開：\n$21 \\times 104$\n$= 21 \\times (100 + 4)$\n$= 21 \\times 100 + 21 \\times 4$\n$= 2100 + 84$\n$= 2184$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "利用乘法公式計算 $102^2$ 的值為何？\n(A) $10404$\n(B) $10204$\n(C) $10004$\n(D) $10440$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用分配律，計算 $18 \\times 97$ 的值為何？",
+            "detailed_solution": "利用分配律展開：\n$18 \\times 97$\n$= 18 \\times (100 - 3)$\n$= 18 \\times 100 - 18 \\times 3$\n$= 1800 - 54$\n$= 1746$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "展開 $(5x - 3y)^2$ 的結果為何？\n(A) $25x^2 - 9y^2$\n(B) $25x^2 - 30xy + 9y^2$\n(C) $25x^2 - 15xy + 9y^2$\n(D) $25x^2 + 30xy + 9y^2$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "若 $a$、$b$、$c$ 皆是整數，且 $a^2+b^2+c^2-ab-bc-ca=1$，試推論 $|a-b|$ 可能的值為何？",
+            "detailed_solution": "將已知等式兩邊同乘 $2$：\n$2a^2+2b^2+2c^2-2ab-2bc-2ca = 2$\n重新分組配方：\n$(a^2-2ab+b^2) + (b^2-2bc+c^2) + (c^2-2ca+a^2) = 2$\n$(a-b)^2 + (b-c)^2 + (c-a)^2 = 2$\n因為 $a,b,c$ 為整數，所以三個括號的平方必定為大於等於 $0$ 的整數。\n三個完全平方數相加等於 $2$，唯一的組合為 $1 + 1 + 0$。\n因此 $(a-b)^2$ 的值只能是 $1$ 或 $0$。\n推論得出 $|a-b|$ 可能的值為 $1$ 或 $0$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "利用乘法公式計算 $98^2$ 的值為何？\n(A) $9604$\n(B) $9804$\n(C) $9904$\n(D) $9504$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "請化簡 $(-x+y)^2$。",
+            "detailed_solution": "利用差的平方公式，可將括號內提出負號：\n$(-x+y)^2$\n$= (-(x-y))^2$\n負號平方後變為正號：\n$= (x-y)^2$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "展開 $(2x + 7)(2x - 7)$ 的結果為何？\n(A) $4x^2 - 14x - 49$\n(B) $4x^2 + 49$\n(C) $4x^2 - 49$\n(D) $2x^2 - 49$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "若 $3x+25=9995^2$，則 $x$ 的值為何？",
+            "detailed_solution": "移項得：$3x = 9995^2 - 25$\n$3x = 9995^2 - 5^2$\n利用平方差公式 $(a^2-b^2)=(a+b)(a-b)$：\n$3x = (9995+5)(9995-5)$\n$3x = 10000 \\times 9990$\n$3x = 99900000$\n兩邊同除以 $3$：\n$x = 33300000$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "利用乘法公式計算 $203 \\times 197$ 的值為何？\n(A) $39991$\n(B) $40009$\n(C) $39909$\n(D) $39999$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "計算 $\\frac{2000^2+48 \\times 2000+24^2}{96 \\times 80+8^2}$ 之值為何？",
+            "detailed_solution": "分子利用和的平方公式 $a^2+2ab+b^2=(a+b)^2$：\n$2000^2 + 2 \\times 24 \\times 2000 + 24^2 = (2000+24)^2 = 2024^2$\n分母整理後利用平方差公式：\n$96 \\times 80 + 8^2$\n$= (88+8)(88-8) + 8^2$\n$= (88^2 - 8^2) + 8^2$\n$= 88^2$\n原式 $= \\frac{2024^2}{88^2} = (\\frac{2024}{88})^2 = 23^2 = 529$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "已知 $a+b=8$ 且 $ab=15$，求 $a^2+b^2$ 的值為何？\n(A) $34$\n(B) $49$\n(C) $64$\n(D) $19$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "小億和小辰參加數學遊戲比賽，從卡片盒中各抽出一張數字卡，誰抽到的數字平方最接近 $2000^2$ 就獲勝。小億抽到 $1985$，小辰抽到 $2015$，請問誰會獲勝？",
+            "detailed_solution": "計算兩人數字平方與 $2000^2$ 的差值（取絕對值）：\n小億：$|1985^2 - 2000^2|$\n$= |(2000-15)^2 - 2000^2|$\n$= |(2000^2 - 2 \\times 2000 \\times 15 + 15^2) - 2000^2|$\n$= |-60000 + 225| = 59775$\n小辰：$|2015^2 - 2000^2|$\n$= |(2000+15)^2 - 2000^2|$\n$= |(2000^2 + 2 \\times 2000 \\times 15 + 15^2) - 2000^2|$\n$= |60000 + 225| = 60225$\n因為 $59775 < 60225$，故小億的數字平方比較接近 $2000^2$，小億獲勝。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "化簡 $(x+4)^2 - (x-4)^2$ 的結果為何？\n(A) $16x$\n(B) $8x$\n(C) $2x^2 + 32$\n(D) $0$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "已知 $(a+b)^2=7$，$(a-b)^2=4$，試求 $ab$ 之值為何？",
+            "detailed_solution": "將兩式相減：\n$(a+b)^2 - (a-b)^2 = 7 - 4$\n展開左式：\n$(a^2+2ab+b^2) - (a^2-2ab+b^2) = 3$\n$4ab = 3$\n$ab = \\frac{3}{4}$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "已知 $a-b=5$ 且 $ab=6$，求 $a^2+b^2$ 的值為何？\n(A) $25$\n(B) $37$\n(C) $13$\n(D) $31$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用乘法公式計算 $402^2$ 之值為何？",
+            "detailed_solution": "利用和的平方公式：\n$402^2 = (400+2)^2$\n$= 400^2 + 2 \\times 400 \\times 2 + 2^2$\n$= 160000 + 1600 + 4$\n$= 161604$。"
         },
         {
-            "category": "國二上-1-1重點一-乘法公式",
-            "image_path": "static/images/empty.jpg",
-            "question_text": "有一大正方形邊長為 $x$，內部挖去一個邊長為 $y$ 的小正方形，剩餘面積可表示為下列何者？\n(A) $(x-y)^2$\n(B) $(x+y)^2$\n(C) $(x+y)(x-y)$\n(D) $x^2 + y^2$",
-            "detailed_solution": "預留詳解區塊"
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用乘法公式計算 $303^2 - 2 \\times 303 \\times 3 + 3^2$ 之值為何？",
+            "detailed_solution": "觀察式子符合差的平方公式 $a^2 - 2ab + b^2 = (a-b)^2$：\n令 $a=303$，$b=3$\n$303^2 - 2 \\times 303 \\times 3 + 3^2$\n$= (303 - 3)^2$\n$= 300^2$\n$= 90000$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q11.jpg",
+            "question_text": "在生活科技課程中，學生製作木工作品，所使用的木板如圖所示。已知甲木板為一個邊長 $70$ 公分的正方形，四個角落各切去一個邊長為 $10$ 公分的小正方形；乙木板為一個邊長 $72$ 公分的正方形，右上角切去一個長 $22$ 公分的小正方形。請計算並比較甲、乙兩塊木板的面積大小關係。",
+            "detailed_solution": "甲木板面積 $= 70^2 - 4 \\times 10^2$\n$= 4900 - 4 \\times 100 = 4900 - 400 = 4500$\n乙木板面積 $= 72^2 - 22^2$\n利用平方差公式：\n$= (72+22)(72-22)$\n$= 94 \\times 50 = 4700$\n因為 $4700 > 4500$，所以乙木板面積 $>$ 甲木板面積。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q12.jpg",
+            "question_text": "在生活科技課程中，王老師設計了一個邊長 $90$ 公分的正方形賽道，且中間挖出一個邊長 $20$ 公分的正方形空間放障礙物，如圖所示。則此賽道的面積為多少平方公分？",
+            "detailed_solution": "賽道面積 $=$ 大正方形面積 $-$ 小正方形面積\n$= 90^2 - 20^2$\n利用平方差公式：\n$= (90+20)(90-20)$\n$= 110 \\times 70 = 7700$ 平方公分。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "已知 $299^2 = A + 1$，則 $A$ 的值為何？",
+            "detailed_solution": "移項可得：\n$A = 299^2 - 1$\n$A = 299^2 - 1^2$\n利用平方差公式：\n$A = (299+1)(299-1)$\n$A = 300 \\times 298 = 89400$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "已知 $(1993.5)^2 = 1993^2 + x$，則 $x$ 的值為何？",
+            "detailed_solution": "移項可得：\n$x = 1993.5^2 - 1993^2$\n利用平方差公式：\n$x = (1993.5 + 1993)(1993.5 - 1993)$\n$x = 3986.5 \\times 0.5$\n$x = 1993.25$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q15.jpg",
+            "question_text": "如圖，將四個面積分別為 $ab$、$ad$、$bc$、$cd$ 的小長方形拼成一個大長方形，請利用因式分解，寫出此大長方形面積的乘積形式為何？",
+            "detailed_solution": "大長方形的總面積為四個小長方形面積之和：\n面積 $= ab + ad + bc + cd$\n先將前兩項與後兩項分別提出公因式：\n$= a(b+d) + c(b+d)$\n再提出共同的公因式 $(b+d)$：\n$= (a+c)(b+d)$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用和的平方公式，計算 $402^2 = 400^2 + \\square \\times 400 + 2^2$，則 $\\square$ 應填入的數字為何？",
+            "detailed_solution": "利用和的平方公式 $(a+b)^2 = a^2 + 2ab + b^2$：\n$402^2 = (400+2)^2$\n$= 400^2 + 2 \\times 400 \\times 2 + 2^2$\n$= 400^2 + 4 \\times 400 + 2^2$\n對照題目等式，可知 $\\square = 4$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "甲 $=\\frac{50^2 - 30^2}{20}$，乙 $=\\frac{100^2 - 20^2}{120}$，試比較甲、乙的大小關係。",
+            "detailed_solution": "利用平方差公式分別計算甲、乙的值：\n甲 $= \\frac{(50+30)(50-30)}{20} = \\frac{80 \\times 20}{20} = 80$\n乙 $= \\frac{(100+20)(100-20)}{120} = \\frac{120 \\times 80}{120} = 80$\n因為計算結果皆為 $80$，故甲 $=$ 乙。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q18.jpg",
+            "question_text": "如圖，大、小正方形的邊長分別為 $299$ 與 $99$，則圖中斜線部分的面積為多少平方單位？",
+            "detailed_solution": "斜線部分面積 $=$ 大正方形面積 $-$ 小正方形面積\n$= 299^2 - 99^2$\n利用平方差公式：\n$= (299+99)(299-99)$\n$= 398 \\times 200 = 79600$ 平方單位。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q19.jpg",
+            "question_text": "如圖，阿土伯有一正方形的土地，邊長為 $202\\frac{1}{2}$ 公尺，他從中間挖去一個邊長為 $197\\frac{1}{2}$ 公尺的正方形作游泳池，則剩下的走道部分（即斜線部分）的面積是多少平方公尺？",
+            "detailed_solution": "斜線部分面積 $=$ 土地總面積 $-$ 游泳池面積\n$= (202.5)^2 - (197.5)^2$\n利用平方差公式：\n$= (202.5 + 197.5)(202.5 - 197.5)$\n$= 400 \\times 5 = 2000$ 平方公尺。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q20.jpg",
+            "question_text": "如圖，已知大圓半徑為 $39$，小圓半徑為 $9$，求灰色部分的面積為多少平方單位？",
+            "detailed_solution": "灰色部分面積 $=$ 大圓面積 $-$ 小圓面積\n$= \\pi \\times 39^2 - \\pi \\times 9^2$\n提出公因式 $\\pi$：\n$= \\pi(39^2 - 9^2)$\n利用平方差公式：\n$= \\pi(39+9)(39-9)$\n$= \\pi \\times 48 \\times 30 = 1440\\pi$ 平方單位。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q21.jpg",
+            "question_text": "如圖，每一個角都是直角，求此 L 型六邊形的面積為多少平方單位？",
+            "detailed_solution": "將圖形補齊成一個邊長為 $87$ 的大正方形，再扣除左上角缺少的正方形。\n缺少的正方形邊長為：$87 - 40 = 47$\nL 型面積 $=$ 大正方形面積 $-$ 小正方形面積\n$= 87^2 - 47^2$\n利用平方差公式：\n$= (87+47)(87-47)$\n$= 134 \\times 40 = 5360$ 平方單位。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "試化簡 $(2x-y)^2 + 2(2x-y)(2x+y) + (2x+y)^2$。",
+            "detailed_solution": "觀察式子符合和的平方公式 $a^2 + 2ab + b^2 = (a+b)^2$：\n令 $a = (2x-y)$，$b = (2x+y)$\n原式 $= [(2x-y) + (2x+y)]^2$\n$= (2x - y + 2x + y)^2$\n$= (4x)^2 = 16x^2$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "若 $a-b=5$，$ab=2$，求 $a^2+b^2$ 之值為何？",
+            "detailed_solution": "利用差的平方公式變形：$a^2+b^2 = (a-b)^2 + 2ab$\n代入已知數值：\n$a^2+b^2 = 5^2 + 2 \\times 2$\n$= 25 + 4 = 29$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "求大於 $(99.94)^2$ 的最小整數是多少？",
+            "detailed_solution": "利用差的平方公式展開：\n$99.94^2 = (100 - 0.06)^2$\n$= 100^2 - 2 \\times 100 \\times 0.06 + 0.06^2$\n$= 10000 - 12 + 0.0036$\n$= 9988.0036$\n大於 $9988.0036$ 的最小整數為 $9989$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q25.jpg",
+            "question_text": "附圖是將兩個邊長分別為 $29$ 公分和 $19$ 公分的等腰直角三角形重疊後的圖形，試求出灰色部分的面積為多少平方公分？",
+            "detailed_solution": "灰色部分面積 $=$ 大等腰直角三角形面積 $-$ 小等腰直角三角形面積\n$= \\frac{1}{2} \\times 29^2 - \\frac{1}{2} \\times 19^2$\n提出公因式 $\\frac{1}{2}$，並利用平方差公式：\n$= \\frac{1}{2}(29^2 - 19^2)$\n$= \\frac{1}{2}(29+19)(29-19)$\n$= \\frac{1}{2}(48 \\times 10) = 240$ 平方公分。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "請利用和的平方公式展開 $(a+b+c)^2$。",
+            "detailed_solution": "將 $(a+b)$ 視為一項，利用和的平方公式展開：\n$(a+b+c)^2 = ((a+b)+c)^2$\n$= (a+b)^2 + 2(a+b)c + c^2$\n再次展開前方的和的平方，並分配律乘開中間項：\n$= (a^2+2ab+b^2) + (2ac+2bc) + c^2$\n依字母順序重新排列：\n$= a^2+b^2+c^2+2ab+2bc+2ca$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "已知 $a-b=4$，$ab=5$，則 $a^2+b^2$ 的值為何？",
+            "detailed_solution": "利用差的平方公式變形：$a^2+b^2 = (a-b)^2 + 2ab$\n代入已知數值：\n$a^2+b^2 = 4^2 + 2 \\times 5$\n$= 16 + 10 = 26$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "已知 $a-b=7$，$ab=12$，試求 $a^2+b^2$ 的值為何？",
+            "detailed_solution": "利用差的平方公式變形：$a^2+b^2 = (a-b)^2 + 2ab$\n代入已知數值：\n$a^2+b^2 = 7^2 + 2 \\times 12$\n$= 49 + 24 = 73$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "",
+            "question_text": "利用乘法公式計算 $(172\\frac{1}{2})^2-(27\\frac{1}{2})^2$ 的值為何？",
+            "detailed_solution": "將帶分數轉換為小數：$172.5^2 - 27.5^2$\n利用平方差公式：\n$= (172.5 + 27.5)(172.5 - 27.5)$\n$= 200 \\times 145 = 29000$。"
+        },
+        {
+            "category": "國二上-1-1-乘法公式",
+            "image_path": "static/images/q30.jpg",
+            "question_text": "利用乘法公式，求出 $\\frac{388^2 - 232^2}{(388+232)^2}$ 的值為何？",
+            "detailed_solution": "先分別計算分子與分母：\n分子利用平方差公式：\n$388^2 - 232^2 = (388+232)(388-232) = 620 \\times 156$\n分母計算底數相加：\n$(388+232)^2 = 620^2 = 620 \\times 620$\n原式 $= \\frac{620 \\times 156}{620 \\times 620}$\n約分消去 $620$：\n$= \\frac{156}{620}$\n分子分母同除以 $4$：\n$= \\frac{39}{155}$。"
         }
-        
     ]
 
     for item in problems_data:
@@ -78,7 +199,7 @@ def seed_data():
         db.add(new_prob)
         
     db.commit()
-    print(f"✅ 成功匯入 {len(problems_data)} 題測試資料至 SQLite 資料庫！")
+    print(f"✅ 成功匯入 {len(problems_data)} 題「國二上-1-1-乘法公式」測試資料至 SQLite 資料庫！")
     db.close()
 
 if __name__ == "__main__":
