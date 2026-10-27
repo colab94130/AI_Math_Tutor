@@ -378,6 +378,51 @@ def seed_data():
             "question_text": "計算 $(-7x^2+12) - (6x^2+4x-5) = $？[cite: 68]",
             "detailed_solution": "去括號，注意減號後方的所有項都要變號：\n$-7x^2 + 12 - 6x^2 - 4x + 5$\n合併同類項並依降冪排列：\n$= (-7x^2 - 6x^2) - 4x + (12 + 5)$\n$= -13x^2 - 4x + 17$。"
         },
+        # ==========================================
+        # 1-3 多項式的乘除
+        # ==========================================
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "計算 $(x^2-1) - [2x^2-x-4+(2x^2-1)] = $？[cite: 69]",
+            "detailed_solution": "先將中括號內的同類項合併：\n$2x^2 - x - 4 + 2x^2 - 1 = 4x^2 - x - 5$\n代回原式並去括號，減號後的項需變號：\n$(x^2-1) - (4x^2 - x - 5)$\n$= x^2 - 1 - 4x^2 + x + 5$\n將同類項合併並依降冪排列：\n$= -3x^2 + x + 4$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "一數學題「兩個多項式 $P$、$Q$，其中 $Q$ 為 $2x^2+x-1$，試求 $P+Q$」，但是小薰在解此題時誤將 $P+Q$ 看成 $P-Q$，除此之外沒有其他計算上的錯誤，算出的答案為 $5x^2-3x-7$，求正確的答案 $P+Q = $？[cite: 70]",
+            "detailed_solution": "已知小薰的算式為：$P - Q = 5x^2 - 3x - 7$\n移項求出多項式 $P$：\n$P = (5x^2 - 3x - 7) + Q$\n$P = (5x^2 - 3x - 7) + (2x^2 + x - 1)$\n$P = 7x^2 - 2x - 8$\n接著求正確的答案 $P+Q$：\n$P+Q = (7x^2 - 2x - 8) + (2x^2 + x - 1)$\n$= (7+2)x^2 + (-2+1)x + (-8-1)$\n$= 9x^2 - x - 9$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "計算 $(2x^2+3x+6) + (x^2+3x+15) + (-2x+4x^2+1)$ 的結果。[cite: 71]",
+            "detailed_solution": "將括號去掉後，把所有同類項合併並依降冪排列：\n$x^2$ 項：$2x^2 + x^2 + 4x^2 = 7x^2$\n$x$ 項：$3x + 3x - 2x = 4x$\n常數項：$6 + 15 + 1 = 22$\n合併結果為：$7x^2 + 4x + 22$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "計算 $(-7x^2+12) - (6x^2+4x-5) = $？[cite: 72]",
+            "detailed_solution": "去括號，注意減號後方的所有項都要變號：\n$-7x^2 + 12 - 6x^2 - 4x + 5$\n合併同類項並依降冪排列：\n$= (-7x^2 - 6x^2) - 4x + (12 + 5)$\n$= -13x^2 - 4x + 17$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "計算 $(7x^2+x-4) \\div (7x-4)$ 的商式和餘式分別為何？[cite: 73]",
+            "detailed_solution": "利用長除法進行多項式除法：\n1. 用被除式的首項 $7x^2$ 除以除式的首項 $7x$，得商的首項為 $x$。\n2. 將 $x$ 乘上除式 $(7x-4)$，得到 $7x^2 - 4x$。\n3. 相減：$(7x^2 + x - 4) - (7x^2 - 4x) = 5x - 4$。\n由於餘下的式子次數 ($1$次) 並未小於除式的次數 ($1$次)，繼續除。\n但觀察此處長除法，若繼續除，$\\frac{5x}{7x} = \\frac{5}{7}$。\n重新整理長除法步驟：\n$$ \\require{enclose} \\begin{array}{rll} x + \\frac{5}{7} \\phantom{0000} \\\\[-3pt] 7x-4 \\enclose{longdiv}{ 7x^2 + x - 4 \\phantom{0}} \\\\[-3pt] \\underline{-(7x^2 - 4x) \\phantom{00}} \\\\[-3pt] 5x - 4 \\phantom{0} \\\\[-3pt] \\underline{-(5x - \\frac{20}{7}) } \\\\[-3pt] -\\frac{8}{7} \\phantom{0} \\end{array} $$\n故商式為 $x + \\frac{5}{7}$，餘式為 $-\\frac{8}{7}$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "化簡 $(x-1)(x+2)(x-5) = $？[cite: 75]",
+            "detailed_solution": "先將前兩個括號利用分配律展開（或利用公式 $(x+a)(x+b) = x^2+(a+b)x+ab$）：\n$(x-1)(x+2) = x^2 + (2-1)x + (-1)(2) = x^2 + x - 2$\n再將得到的結果與第三個括號相乘：\n$(x^2 + x - 2)(x - 5)$\n$= x^2(x - 5) + x(x - 5) - 2(x - 5)$\n$= x^3 - 5x^2 + x^2 - 5x - 2x + 10$\n合併同類項並依降冪排列：\n$= x^3 - 4x^2 - 7x + 10$。"
+        },
+        {
+            "category": "國二上-1-3-多項式的乘除",
+            "image_path": "",
+            "question_text": "計算 $(-5x^2+2x+1) \\div (-2x+1)$ 的商式及餘式。[cite: 76]",
+            "detailed_solution": "利用長除法進行多項式除法：\n$$ \\require{enclose} \\begin{array}{rll} \\frac{5}{2}x + \\frac{1}{4} \\phantom{0000} \\\\[-3pt] -2x+1 \\enclose{longdiv}{ -5x^2 + 2x + 1 \\phantom{0}} \\\\[-3pt] \\underline{-(-5x^2 + \\frac{5}{2}x) \\phantom{00}} \\\\[-3pt] -\\frac{1}{2}x + 1 \\phantom{0} \\\\[-3pt] \\underline{-(-\\frac{1}{2}x + \\frac{1}{4}) } \\\\[-3pt] \\frac{3}{4} \\phantom{0} \\end{array} $$\n故商式為 $\\frac{5}{2}x + \\frac{1}{4}$，餘式為 $\\frac{3}{4}$。"
+        },
     ]
 
     for item in problems_data:
