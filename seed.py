@@ -423,6 +423,378 @@ def seed_data():
             "question_text": "計算 $(-5x^2+2x+1) \\div (-2x+1)$ 的商式及餘式。[cite: 76]",
             "detailed_solution": "利用長除法進行多項式除法：\n$$ \\require{enclose} \\begin{array}{rll} \\frac{5}{2}x + \\frac{1}{4} \\phantom{0000} \\\\[-3pt] -2x+1 \\enclose{longdiv}{ -5x^2 + 2x + 1 \\phantom{0}} \\\\[-3pt] \\underline{-(-5x^2 + \\frac{5}{2}x) \\phantom{00}} \\\\[-3pt] -\\frac{1}{2}x + 1 \\phantom{0} \\\\[-3pt] \\underline{-(-\\frac{1}{2}x + \\frac{1}{4}) } \\\\[-3pt] \\frac{3}{4} \\phantom{0} \\end{array} $$\n故商式為 $\\frac{5}{2}x + \\frac{1}{4}$，餘式為 $\\frac{3}{4}$。"
         },
+        # ==========================================
+        # 2-1 平方根的意義 (20題 計算題)
+        # ==========================================
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "求 $144$ 的平方根為何？",
+            "detailed_solution": "因為 $12^2 = 144$ 且 $(-12)^2 = 144$，正數的平方根會有正負兩個，故 $144$ 的平方根為 $\\pm 12$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{225}$ 的值為何？",
+            "detailed_solution": "$\\sqrt{225}$ 代表求 $225$ 的「正」平方根。\n因為 $15^2 = 225$，所以 $\\sqrt{225} = 15$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "判斷 $-\\sqrt{49}$ 的值為何？",
+            "detailed_solution": "$-\\sqrt{49}$ 代表求 $49$ 的「負」平方根。\n因為 $7^2 = 49$，所以 $-\\sqrt{49} = -7$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $x^2 = 81$，求 $x$ 的值為何？",
+            "detailed_solution": "由 $x^2 = 81$ 可知 $x$ 為 $81$ 的平方根。\n$81$ 的平方根為 $\\pm 9$，故 $x = \\pm 9$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{(-13)^2}$ 的值為何？",
+            "detailed_solution": "先計算根號內部的平方：$(-13)^2 = 169$。\n再來求 $169$ 的正平方根：$\\sqrt{169} = 13$。\n(觀念：$\\sqrt{a^2} = |a|$)。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $2x-1$ 的平方根為 $\\pm 5$，求 $x$ 的值為何？",
+            "detailed_solution": "已知 $2x-1$ 的平方根是 $\\pm 5$，代表 $2x-1$ 等於 $(\\pm 5)$ 的平方。\n$2x-1 = (\\pm 5)^2$\n$2x-1 = 25$\n$2x = 26$\n$x = 13$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "請比較 $\\sqrt{10}$、$3$、$\\sqrt{11}$ 三數的大小關係。",
+            "detailed_solution": "為了方便比較，將所有數字都化為根號形式：\n$3 = \\sqrt{3^2} = \\sqrt{9}$。\n因為 $9 < 10 < 11$，所以 $\\sqrt{9} < \\sqrt{10} < \\sqrt{11}$。\n故大小關係為：$3 < \\sqrt{10} < \\sqrt{11}$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $a$ 為正整數，且 $a < \\sqrt{50} < a+1$，求 $a$ 的值為何？",
+            "detailed_solution": "尋找最接近 $50$ 的完全平方數：\n$7^2 = 49$，$8^2 = 64$。\n因為 $49 < 50 < 64$，所以 $\\sqrt{49} < \\sqrt{50} < \\sqrt{64}$，也就是 $7 < \\sqrt{50} < 8$。\n對照 $a < \\sqrt{50} < a+1$，可得 $a = 7$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "滿足 $4 < \\sqrt{x} < 5$ 的整數 $x$ 共有幾個？",
+            "detailed_solution": "將不等式各項同時平方：\n$4^2 < (\\sqrt{x})^2 < 5^2$\n$16 < x < 25$\n滿足此條件的整數 $x$ 有：$17, 18, 19, 20, 21, 22, 23, 24$。\n總共有 $24 - 17 + 1 = 8$ 個。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $\\sqrt{x-3} = 4$，求 $x$ 的值為何？",
+            "detailed_solution": "將等式兩邊同時平方：\n$(\\sqrt{x-3})^2 = 4^2$\n$x - 3 = 16$\n移項得 $x = 16 + 3 = 19$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "求 $0.0144$ 的平方根為何？",
+            "detailed_solution": "將小數化為分數：$0.0144 = \\frac{144}{10000}$。\n求平方根：$\\pm \\sqrt{\\frac{144}{10000}} = \\pm \\frac{12}{100}$。\n化為小數為 $\\pm 0.12$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "估算 $\\sqrt{20}$ 的整數部分為何？",
+            "detailed_solution": "找尋最接近 $20$ 的完全平方數：\n$4^2 = 16$，$5^2 = 25$。\n因為 $16 < 20 < 25$，所以 $\\sqrt{16} < \\sqrt{20} < \\sqrt{25}$，即 $4 < \\sqrt{20} < 5$。\n故 $\\sqrt{20}$ 的整數部分為 $4$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{2^4 \\times 3^2}$ 的值為何？",
+            "detailed_solution": "利用指數律化簡根號內部的數：\n$\\sqrt{2^4 \\times 3^2} = \\sqrt{(2^2 \\times 3)^2}$\n$= \\sqrt{(4 \\times 3)^2} = \\sqrt{12^2}$\n$= 12$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $\\sqrt{2x+5} = 7$，求 $x$ 的值為何？",
+            "detailed_solution": "將等式兩邊同時平方以消除根號：\n$(\\sqrt{2x+5})^2 = 7^2$\n$2x + 5 = 49$\n$2x = 44$\n$x = 22$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "計算 $-\\sqrt{\\frac{16}{25}}$ 的值為何？",
+            "detailed_solution": "根號內為分數時，可分別對分子與分母開根號：\n$-\\sqrt{\\frac{16}{25}} = -\\frac{\\sqrt{16}}{\\sqrt{25}}$\n$= -\\frac{4}{5}$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "求帶分數 $1\\frac{9}{16}$ 的平方根為何？",
+            "detailed_solution": "先將帶分數化為假分數：$1\\frac{9}{16} = \\frac{25}{16}$。\n求平方根：$\\pm \\sqrt{\\frac{25}{16}} = \\pm \\frac{5}{4}$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "滿足 $\\sqrt{30} < x < \\sqrt{80}$ 的正整數 $x$ 有哪些？",
+            "detailed_solution": "將不等式各項同時平方：\n$30 < x^2 < 80$\n尋找平方後介於 $30$ 到 $80$ 之間的正整數：\n$5^2 = 25$ (太小)\n$6^2 = 36$ (符合)\n$7^2 = 49$ (符合)\n$8^2 = 64$ (符合)\n$9^2 = 81$ (太大)\n故滿足條件的正整數 $x$ 為 $6, 7, 8$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $-3$ 是 $2x+1$ 的其中一個平方根，求 $x$ 的值為何？",
+            "detailed_solution": "因為 $-3$ 是 $2x+1$ 的平方根，代表 $(-3)$ 的平方會等於 $2x+1$。\n$(-3)^2 = 2x+1$\n$9 = 2x+1$\n$2x = 8$\n$x = 4$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "若 $a$ 的平方根是 $\\pm 8$，求 $a$ 的值為何？",
+            "detailed_solution": "已知 $a$ 的平方根為 $\\pm 8$，這代表將平方根平方後就會等於原數 $a$。\n$a = (\\pm 8)^2$\n$a = 64$。"
+        },
+        {
+            "category": "國二上-2-1-平方根的意義",
+            "image_path": "",
+            "question_text": "請比較 $4$ 與 $\\sqrt{15}$ 的大小關係。",
+            "detailed_solution": "為了方便比較，將整數 $4$ 化為根號形式：\n$4 = \\sqrt{4^2} = \\sqrt{16}$。\n因為 $16 > 15$，所以 $\\sqrt{16} > \\sqrt{15}$。\n故大小關係為：$4 > \\sqrt{15}$。"
+        },
+
+        # ==========================================
+        # 2-2 根式的運算 (20題 計算題)
+        # ==========================================
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\sqrt{12}$ 化為最簡根式。",
+            "detailed_solution": "利用標準分解式將根號內的數分解：\n$\\sqrt{12} = \\sqrt{4 \\times 3}$\n$= \\sqrt{2^2 \\times 3}$\n將平方數提出根號外：\n$= 2\\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\sqrt{72}$ 化為最簡根式。",
+            "detailed_solution": "尋找 $72$ 的最大完全平方數因數：\n$\\sqrt{72} = \\sqrt{36 \\times 2}$\n$= \\sqrt{6^2 \\times 2}$\n$= 6\\sqrt{2}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{2} \\times \\sqrt{3}$ 的值為何？",
+            "detailed_solution": "利用根式乘法法則 $\\sqrt{a} \\times \\sqrt{b} = \\sqrt{a \\times b}$：\n$\\sqrt{2} \\times \\sqrt{3} = \\sqrt{2 \\times 3}$\n$= \\sqrt{6}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{15} \\times \\sqrt{5}$ 的值為何？",
+            "detailed_solution": "利用根式乘法法則：\n$\\sqrt{15} \\times \\sqrt{5} = \\sqrt{15 \\times 5} = \\sqrt{75}$\n將 $\\sqrt{75}$ 化為最簡根式：\n$\\sqrt{75} = \\sqrt{25 \\times 3} = 5\\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\frac{\\sqrt{18}}{\\sqrt{2}}$ 的值為何？",
+            "detailed_solution": "利用根式除法法則 $\\frac{\\sqrt{a}}{\\sqrt{b}} = \\sqrt{\\frac{a}{b}}$：\n$\\frac{\\sqrt{18}}{\\sqrt{2}} = \\sqrt{\\frac{18}{2}}$\n$= \\sqrt{9}$\n$= 3$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\frac{3}{\\sqrt{3}}$ 進行分母有理化。",
+            "detailed_solution": "為了讓分母的根號消失，分子分母同乘 $\\sqrt{3}$：\n$\\frac{3}{\\sqrt{3}} = \\frac{3 \\times \\sqrt{3}}{\\sqrt{3} \\times \\sqrt{3}}$\n$= \\frac{3\\sqrt{3}}{3}$\n約分後得 $\\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\frac{1}{\\sqrt{2}}$ 進行分母有理化。",
+            "detailed_solution": "分子分母同乘 $\\sqrt{2}$：\n$\\frac{1}{\\sqrt{2}} = \\frac{1 \\times \\sqrt{2}}{\\sqrt{2} \\times \\sqrt{2}}$\n$= \\frac{\\sqrt{2}}{2}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $2\\sqrt{5} + 3\\sqrt{5}$ 的值為何？",
+            "detailed_solution": "根號內部的數字相同（同類方根），可以直接相加係數：\n$2\\sqrt{5} + 3\\sqrt{5} = (2+3)\\sqrt{5}$\n$= 5\\sqrt{5}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $5\\sqrt{2} - 2\\sqrt{8}$ 的值為何？",
+            "detailed_solution": "先將根式化為最簡方根：\n$\\sqrt{8} = \\sqrt{4 \\times 2} = 2\\sqrt{2}$\n代回原式：\n$5\\sqrt{2} - 2(2\\sqrt{2}) = 5\\sqrt{2} - 4\\sqrt{2}$\n$= (5-4)\\sqrt{2} = \\sqrt{2}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "展開並化簡 $\\sqrt{2}(\\sqrt{3} + \\sqrt{2})$。",
+            "detailed_solution": "利用分配律將 $\\sqrt{2}$ 乘進括號：\n$= \\sqrt{2} \\times \\sqrt{3} + \\sqrt{2} \\times \\sqrt{2}$\n$= \\sqrt{6} + 2$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "展開並化簡 $(\\sqrt{3} + 1)(\\sqrt{3} - 1)$。",
+            "detailed_solution": "利用平方差公式 $(a+b)(a-b) = a^2 - b^2$：\n$(\\sqrt{3} + 1)(\\sqrt{3} - 1)$\n$= (\\sqrt{3})^2 - 1^2$\n$= 3 - 1$\n$= 2$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "展開並化簡 $(\\sqrt{5} + \\sqrt{2})^2$。",
+            "detailed_solution": "利用和的平方公式 $(a+b)^2 = a^2 + 2ab + b^2$：\n$(\\sqrt{5} + \\sqrt{2})^2$\n$= (\\sqrt{5})^2 + 2 \\times \\sqrt{5} \\times \\sqrt{2} + (\\sqrt{2})^2$\n$= 5 + 2\\sqrt{10} + 2$\n$= 7 + 2\\sqrt{10}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\frac{2}{\\sqrt{5}-\\sqrt{3}}$ 進行分母有理化。",
+            "detailed_solution": "利用平方差公式，分子分母同乘 $(\\sqrt{5}+\\sqrt{3})$：\n$\\frac{2(\\sqrt{5}+\\sqrt{3})}{(\\sqrt{5}-\\sqrt{3})(\\sqrt{5}+\\sqrt{3})}$\n$= \\frac{2(\\sqrt{5}+\\sqrt{3})}{(\\sqrt{5})^2 - (\\sqrt{3})^2}$\n$= \\frac{2(\\sqrt{5}+\\sqrt{3})}{5 - 3}$\n$= \\frac{2(\\sqrt{5}+\\sqrt{3})}{2}$\n約分後得 $\\sqrt{5} + \\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "將 $\\frac{1}{\\sqrt{3}+1}$ 進行分母有理化。",
+            "detailed_solution": "分子分母同乘 $(\\sqrt{3}-1)$：\n$\\frac{1 \\times (\\sqrt{3}-1)}{(\\sqrt{3}+1)(\\sqrt{3}-1)}$\n$= \\frac{\\sqrt{3}-1}{(\\sqrt{3})^2 - 1^2}$\n$= \\frac{\\sqrt{3}-1}{3 - 1}$\n$= \\frac{\\sqrt{3}-1}{2}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{27} + \\sqrt{12} - \\sqrt{75}$ 的值為何？",
+            "detailed_solution": "先將所有根式化為最簡：\n$\\sqrt{27} = \\sqrt{9 \\times 3} = 3\\sqrt{3}$\n$\\sqrt{12} = \\sqrt{4 \\times 3} = 2\\sqrt{3}$\n$\\sqrt{75} = \\sqrt{25 \\times 3} = 5\\sqrt{3}$\n代回原式計算：\n$3\\sqrt{3} + 2\\sqrt{3} - 5\\sqrt{3}$\n$= (3+2-5)\\sqrt{3}$\n$= 0\\sqrt{3} = 0$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{45} \\div \\sqrt{5} \\times \\sqrt{2}$ 的值為何？",
+            "detailed_solution": "依照由左至右的順序計算，先做除法：\n$\\sqrt{45} \\div \\sqrt{5} = \\sqrt{\\frac{45}{5}} = \\sqrt{9} = 3$\n再乘以後面的 $\\sqrt{2}$：\n$3 \\times \\sqrt{2} = 3\\sqrt{2}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "展開並化簡 $(\\sqrt{6} - \\sqrt{2})^2$。",
+            "detailed_solution": "利用差的平方公式 $(a-b)^2 = a^2 - 2ab + b^2$：\n$(\\sqrt{6} - \\sqrt{2})^2$\n$= (\\sqrt{6})^2 - 2 \\times \\sqrt{6} \\times \\sqrt{2} + (\\sqrt{2})^2$\n$= 6 - 2\\sqrt{12} + 2$\n其中 $\\sqrt{12} = 2\\sqrt{3}$，代入化簡：\n$= 8 - 2(2\\sqrt{3})$\n$= 8 - 4\\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "計算 $\\sqrt{18} \\times \\sqrt{12} \\div \\sqrt{6}$ 的值為何？",
+            "detailed_solution": "可將所有運算放入同一個大根號內：\n$\\sqrt{\\frac{18 \\times 12}{6}}$\n先約分：$\\frac{18}{6} = 3$\n$= \\sqrt{3 \\times 12}$\n$= \\sqrt{36}$\n$= 6$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "化簡 $\\sqrt{2} \\times (\\sqrt{8} + \\sqrt{18})$。",
+            "detailed_solution": "方法一（先化簡括號內）：\n$\\sqrt{8} = 2\\sqrt{2}$，$\\sqrt{18} = 3\\sqrt{2}$\n括號內 $= 2\\sqrt{2} + 3\\sqrt{2} = 5\\sqrt{2}$\n原式 $= \\sqrt{2} \\times 5\\sqrt{2} = 5 \\times 2 = 10$。\n\n方法二（分配律展開）：\n$= \\sqrt{16} + \\sqrt{36}$\n$= 4 + 6 = 10$。"
+        },
+        {
+            "category": "國二上-2-2-根式的運算",
+            "image_path": "",
+            "question_text": "已知 $\\sqrt{2} \\approx 1.414$，求 $\\frac{2}{\\sqrt{2}}$ 的近似值為何？",
+            "detailed_solution": "直接代入小數計算不好除，先將分數進行分母有理化：\n$\\frac{2}{\\sqrt{2}} = \\frac{2 \\times \\sqrt{2}}{\\sqrt{2} \\times \\sqrt{2}} = \\frac{2\\sqrt{2}}{2} = \\sqrt{2}$\n已知 $\\sqrt{2} \\approx 1.414$，故答案即為 $1.414$。"
+        },
+
+        # ==========================================
+        # 2-3 畢氏定理 (20題 計算題)
+        # ==========================================
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一直角三角形的兩股長分別為 $3$ 和 $4$，求其斜邊長為何？",
+            "detailed_solution": "設斜邊長為 $c$，依據畢氏定理 $a^2 + b^2 = c^2$：\n$3^2 + 4^2 = c^2$\n$9 + 16 = c^2$\n$c^2 = 25$\n因為邊長必為正數，故 $c = \\sqrt{25} = 5$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "已知一直角三角形的斜邊長為 $13$，其中一股長為 $5$，求另一股的長度為何？",
+            "detailed_solution": "設另一股長為 $b$，依據畢氏定理：\n$5^2 + b^2 = 13^2$\n$25 + b^2 = 169$\n$b^2 = 169 - 25 = 144$\n故 $b = \\sqrt{144} = 12$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一直角三角形的兩股長分別為 $6$ 和 $8$，求斜邊長為何？",
+            "detailed_solution": "設斜邊長為 $c$，依據畢氏定理：\n$6^2 + 8^2 = c^2$\n$36 + 64 = c^2$\n$c^2 = 100$\n故 $c = \\sqrt{100} = 10$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "直角三角形的斜邊長為 $25$，一股長為 $7$，求另一股長為何？",
+            "detailed_solution": "設另一股長為 $x$，依據畢氏定理：\n$7^2 + x^2 = 25^2$\n$49 + x^2 = 625$\n$x^2 = 625 - 49 = 576$\n故 $x = \\sqrt{576} = 24$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一直角三角形的兩股長分別為 $5$ 和 $12$，求此三角形的面積為何？",
+            "detailed_solution": "直角三角形的兩股即為其底與高。\n三角形面積 $= \\frac{1}{2} \\times 底 \\times 高$\n$= \\frac{1}{2} \\times 5 \\times 12$\n$= 30$ 平方單位。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一直角三角形的兩股長分別為 $8$ 和 $15$，求其斜邊長為何？",
+            "detailed_solution": "設斜邊長為 $c$，依據畢氏定理：\n$8^2 + 15^2 = c^2$\n$64 + 225 = c^2$\n$c^2 = 289$\n故 $c = \\sqrt{289} = 17$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "在坐標平面上，求兩點 $A(0,0)$ 與 $B(3,4)$ 的距離為何？",
+            "detailed_solution": "利用兩點距離公式 $d = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}$：\n$\\overline{AB} = \\sqrt{(3-0)^2 + (4-0)^2}$\n$= \\sqrt{3^2 + 4^2}$\n$= \\sqrt{9 + 16} = \\sqrt{25} = 5$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "在坐標平面上，求兩點 $P(-2, 1)$ 與 $Q(4, 9)$ 的距離為何？",
+            "detailed_solution": "利用兩點距離公式：\n$\\overline{PQ} = \\sqrt{(4 - (-2))^2 + (9 - 1)^2}$\n$= \\sqrt{6^2 + 8^2}$\n$= \\sqrt{36 + 64} = \\sqrt{100} = 10$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一矩形的長為 $24$，寬為 $7$，求其對角線長為何？",
+            "detailed_solution": "矩形的長、寬與對角線剛好構成一個直角三角形。\n設對角線長為 $d$，依據畢氏定理：\n$24^2 + 7^2 = d^2$\n$576 + 49 = d^2$\n$d^2 = 625$\n故 $d = 25$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "已知一正方形的對角線長為 $4\\sqrt{2}$，求其邊長為何？",
+            "detailed_solution": "設正方形邊長為 $x$，由畢氏定理可知，兩邊長的平方和等於對角線的平方：\n$x^2 + x^2 = (4\\sqrt{2})^2$\n$2x^2 = 16 \\times 2 = 32$\n$x^2 = 16$\n故邊長 $x = 4$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一等腰直角三角形的斜邊長為 $10$，求其股長為何？",
+            "detailed_solution": "設兩股長皆為 $x$，依據畢氏定理：\n$x^2 + x^2 = 10^2$\n$2x^2 = 100$\n$x^2 = 50$\n$x = \\sqrt{50} = 5\\sqrt{2}$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "有一把長 $2.5$ 公尺的梯子，斜靠在垂直的牆上。若梯腳距離牆底 $1.5$ 公尺，求梯頂離地面的高度為多少公尺？",
+            "detailed_solution": "梯長(斜邊)、梯腳距牆底距離(一股)與牆高(另一股)構成直角三角形。\n設牆高為 $h$，依據畢氏定理：\n$1.5^2 + h^2 = 2.5^2$\n$2.25 + h^2 = 6.25$\n$h^2 = 4.00$\n故 $h = \\sqrt{4} = 2$ 公尺。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "已知一正三角形的邊長為 $6$，求其高為何？",
+            "detailed_solution": "正三角形的高會將底邊平分。畫出高後，可得到一個直角三角形，斜邊為 $6$，底邊的一半為 $3$。\n設高為 $h$，依據畢氏定理：\n$3^2 + h^2 = 6^2$\n$9 + h^2 = 36$\n$h^2 = 27$\n故 $h = \\sqrt{27} = 3\\sqrt{3}$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "已知一正三角形的邊長為 $8$，求其面積為何？",
+            "detailed_solution": "先求高，高將底邊平分為 $4$。\n設高為 $h$，由畢氏定理：$4^2 + h^2 = 8^2 \\Rightarrow 16 + h^2 = 64 \\Rightarrow h^2 = 48 \\Rightarrow h = \\sqrt{48} = 4\\sqrt{3}$。\n三角形面積 $= \\frac{1}{2} \\times 底 \\times 高$\n$= \\frac{1}{2} \\times 8 \\times 4\\sqrt{3}$\n$= 16\\sqrt{3}$ 平方單位。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "在坐標平面上，點 $A(-3, -4)$ 到原點 $O(0, 0)$ 的距離為何？",
+            "detailed_solution": "利用兩點距離公式：\n$\\overline{AO} = \\sqrt{(-3 - 0)^2 + (-4 - 0)^2}$\n$= \\sqrt{(-3)^2 + (-4)^2}$\n$= \\sqrt{9 + 16} = \\sqrt{25} = 5$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一直角三角形的兩股長分別為 $9$ 和 $12$，求斜邊長為何？",
+            "detailed_solution": "設斜邊長為 $c$，依據畢氏定理：\n$9^2 + 12^2 = c^2$\n$81 + 144 = c^2$\n$c^2 = 225$\n故 $c = \\sqrt{225} = 15$。\n（也可觀察其為 $3:4:5$ 直角三角形的 $3$ 倍放大版：$9:12:15$）。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "已知直角三角形三邊長為 $a, b, c$ 且 $c$ 為斜邊。若 $a=10, c=26$，求 $b$ 的值為何？",
+            "detailed_solution": "依據畢氏定理 $a^2 + b^2 = c^2$：\n$10^2 + b^2 = 26^2$\n$100 + b^2 = 676$\n$b^2 = 576$\n故 $b = \\sqrt{576} = 24$。\n（也可觀察其為 $5:12:13$ 直角三角形的 $2$ 倍放大版）。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "請利用畢氏定理判斷，$5, 12, 13$ 這三個數字是否能構成直角三角形的三邊長？（請回答是或否）",
+            "detailed_solution": "判斷最長邊 $13$ 是否滿足畢氏定理：\n較短兩邊的平方和 $= 5^2 + 12^2 = 25 + 144 = 169$。\n最長邊的平方 $= 13^2 = 169$。\n因為 $5^2 + 12^2 = 13^2$，完全符合畢氏定理，故答案為「是」。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一菱形的兩對角線長分別為 $12$ 和 $16$，求此菱形的邊長為何？",
+            "detailed_solution": "菱形的對角線互相垂直且平分。因此兩條對角線將菱形切分為四個全等的直角三角形。\n直角三角形的兩股長為對角線的一半，分別為 $\\frac{12}{2}=6$ 與 $\\frac{16}{2}=8$。\n設菱形邊長（即直角三角形的斜邊）為 $x$：\n$6^2 + 8^2 = x^2$\n$36 + 64 = 100 = x^2$\n故 $x = \\sqrt{100} = 10$。"
+        },
+        {
+            "category": "國二上-2-3-畢氏定理",
+            "image_path": "",
+            "question_text": "一長方體的長、寬、高分別為 $3, 4, 12$，求此長方體內部最長對角線的長度為何？",
+            "detailed_solution": "長方體內部對角線長度的公式為 $d = \\sqrt{長^2 + 寬^2 + 高^2}$。\n代入數值：\n$d = \\sqrt{3^2 + 4^2 + 12^2}$\n$= \\sqrt{9 + 16 + 144}$\n$= \\sqrt{169}$\n$= 13$。"
+        }
+    ]
     ]
 
     for item in problems_data:
