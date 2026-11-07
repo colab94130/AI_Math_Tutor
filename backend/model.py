@@ -7,7 +7,60 @@ import io
 from PIL import Image
 from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor, TextIteratorStreamer, BitsAndBytesConfig
 from threading import Thread
+from peft import PeftModel
 
+# 宣告全域變數
+model = None
+processor = None
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+# 2. 建立 11 單元微型資料索引小抄
+MATH_CHEAT_SHEET = """
+01 乘法公式：(a±b)²、a²-b²、展開、面積分割、平方和差、分配律。
+02 多項式加減：單項式、常數項、同類項合併、降升冪、去括號、項數。
+03 多項式乘除：長除法、分離係數、商餘式、缺項補零、除法原理。
+04 平方根意義：√、正負平方根、完全平方數、十分逼近法。
+05 根式運算：最簡根式、有理化分母、同類根式、共軛、根號加減。
+06 畢氏定理：直角三角形、斜邊、兩股、a²+b²=c²、畢氏數、兩點距離。
+07 提公因式與乘法公式：因式分解、提公因式、質因式、分組、完全平方式。
+08 十字交乘法：十字交乘、二次項與常數項分解、同異號判斷。
+09 因式分解解方程式：一元二次方程式、=0、零積性質、方程式的根、重根。
+10 配方法與公式解：配完全平方式、b²-4ac、判別式、公式解、相異兩實根、無解。
+11 應用問題：假設未知數、依題意列式、速率/工程問題、務必檢查答案是否不合題意。
+"""
+
+def load_model():
+    global model, processor
+    
+    MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
+    LORA_PATH = "./model/qwen-vl-math-tutor-final" 
+
+    print("⏳ 1/3 載入處理器 (Processor)...")
+    processor = AutoProcessor.from_pretrained(MODEL_ID)
+    
+    print("⏳ 2/3 載入基礎模型 (Base Model，包含 4-bit 量化以節省顯存)...")
+    quant_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.float16
+    )
+    base_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        MODEL_ID,
+        torch_dtype=torch.float16,
+        quantization_config=quant_config,
+        device_map="auto"
+    )
+    
+    print(f"🔗 3/3 正在掛載 LoRA 微調權重 ({LORA_PATH})...")
+    # 將你的專屬權重掛載到基礎模型上
+    model = PeftModel.from_pretrained(base_model, LORA_PATH)
+    model.eval()
+    
+    print("✅ 專屬數學家教模型載入完成，隨時準備接客！")
+
+def get_model():
+    if model is None or processor is None:
+        load_model()
+    return model, processor
 # 2. 建立 11 單元微型資料索引小抄
 MATH_CHEAT_SHEET = """
 

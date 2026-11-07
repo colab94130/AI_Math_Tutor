@@ -5,16 +5,29 @@ import json, os, asyncio, random
 from datetime import datetime
 from typing import Optional
 import shutil
+from contextlib import asynccontextmanager # ⚠️ 新增這行
 
 # 匯入 SQLAdmin 與資料庫模組
 from sqladmin import Admin, ModelView
 from .database import engine, Problem, SessionLocal
-from .model import process_with_qwen_vl, process_quiz_grading # 載入新增的多圖文批改函式
+# ⚠️ 注意這裡：多匯入了 load_model
+from .model import process_with_qwen_vl, process_quiz_grading, load_model 
 
-app = FastAPI()
+# ⚠️ 定義啟動生命週期：伺服器啟動時優先載入 AI 模型
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🌟 伺服器啟動中，準備喚醒數學家教 AI...")
+    load_model()
+    yield
+    print("💤 伺服器關閉中...")
+
+# ⚠️ 將 lifespan 綁定到 app
+app = FastAPI(lifespan=lifespan)
 
 from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ================= 下方保留你原本的 app.add_middleware 與其他路由 =================
 
 app.add_middleware(
     CORSMiddleware,

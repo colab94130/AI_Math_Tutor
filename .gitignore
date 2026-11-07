@@ -4,3 +4,4 @@ __pycache__/
 static/uploads/*
 *.db
 .vscode/
+echo "model/" >> .gitignore
