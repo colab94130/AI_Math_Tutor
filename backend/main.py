@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Body, HTTPException, File, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json, os, asyncio, random
+import json, os, asyncio, random, math
 from datetime import datetime
 from typing import Optional
 import shutil
@@ -9,7 +9,8 @@ from contextlib import asynccontextmanager
 
 from sqladmin import Admin, ModelView
 from .database import engine, Problem, SessionLocal
-from .model import process_qwen_ocr_only, process_explanation, process_classification, process_quiz_grading, load_model
+from .model import (process_qwen_ocr_only, process_explanation, process_classification, load_model,
+                    process_quiz_ocr, process_quiz_judge, process_quiz_explain)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,19 +90,13 @@ async def get_history(username: str):
     user = next((u for u in users if u['username'] == username), None)
     return user.get('history', []) if user else []
 
-# ================= AI 解題核心功能 =================
 @app.post("/solve")
 async def solve_endpoint(data: dict = Body(...)):
     query = data.get("query")
     streamer = process_explanation(query) 
     
     async def generate_wrapper():
-        metadata = {
-            "answer": "請看下方老師詳解", 
-            "translated_eq": "輸入/情境：" + query[:30] + "...", 
-            "plot": None,
-            "image_url": "" 
-        }
+        metadata = {"answer": "請看下方老師詳解", "translated_eq": "輸入/情境：" + query[:30] + "...", "plot": None, "image_url": ""}
         yield json.dumps(metadata) + "\n--SEP--\n"
         for chunk in streamer:
             if chunk:
@@ -109,7 +104,6 @@ async def solve_endpoint(data: dict = Body(...)):
                 await asyncio.sleep(0.01)
                 
         category_text = await process_classification(query)
-        # ⚠️ 直接輸出「單元分類：01 乘法公式」
         yield f"\n\n---\n單元分類：{category_text}"
                 
     return StreamingResponse(generate_wrapper(), media_type="text/plain")
@@ -122,6 +116,7 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         unique_filename = f"upload_{timestamp}.{file_extension}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
         
+        # 🛡️ 恢復原本最單純、最穩定的檔案儲存法
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
@@ -132,12 +127,7 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         streamer = process_explanation(extracted_latex)
         
         async def generate_wrapper():
-            metadata = {
-                "answer": "", 
-                "translated_eq": "【辨識算式】\n" + extracted_latex, 
-                "plot": None,
-                "image_url": "/" + file_path
-            }
+            metadata = {"answer": "", "translated_eq": "【辨識算式】\n" + extracted_latex, "plot": None, "image_url": "/" + file_path}
             yield json.dumps(metadata) + "\n--SEP--\n"
             
             for chunk in streamer:
@@ -153,55 +143,52 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         print(f"❌ 發生異常: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ================= 智慧出題 (Active Recall) =================
-# ⚠️ 將小抄名稱與資料庫真實名稱對應的字典
+
 CAT_MAPPING = {
-    "01": "國二上-1-1-乘法公式",
-    "02": "國二上-1-2-多項式的加減",
-    "03": "國二上-1-3-多項式的乘除",
-    "04": "國二上-2-1-平方根的意義",
-    "05": "國二上-2-2-根式的運算",
-    "06": "國二上-2-3-畢氏定理",
-    "07": "國二上-3-1-提公因式與乘法公式作因式分解",
-    "08": "國二上-3-2-利用十字交乘法因式分解",
-    "09": "國二上-4-1-因式分解法解一元二次方程式",
-    "10": "國二上-4-2-配方法與公式解",
-    "11": "國二上-4-3-應用問題"
+    "01": "國二上-1-1-乘法公式", "02": "國二上-1-2-多項式的加減", "03": "國二上-1-3-多項式的乘除",
+    "04": "國二上-2-1-平方根的意義", "05": "國二上-2-2-根式的運算", "06": "國二上-2-3-畢氏定理",
+    "07": "國二上-3-1-提公因式與乘法公式作因式分解", "08": "國二上-3-2-利用十字交乘法因式分解",
+    "09": "國二上-4-1-因式分解法解一元二次方程式", "10": "國二上-4-2-配方法與公式解", "11": "國二上-4-3-應用問題"
 }
 
 @app.post("/generate_quiz")
 async def generate_quiz_endpoint(data: dict = Body(...)):
     _categories = data.get("categories", [])
     
-    # 將前端傳來的 "01 乘法公式" 翻譯成資料庫的 "國二上-1-1-乘法公式"
     db_categories = []
     for c in _categories:
-        matched = False
-        for key, db_val in CAT_MAPPING.items():
-            if key in c:
-                db_categories.append(db_val)
-                matched = True
-                break
-        if not matched:
+        prefix = c[:2] 
+        if prefix in CAT_MAPPING:
+            db_categories.append(CAT_MAPPING[prefix])
+        else:
             db_categories.append(c)
 
     db = SessionLocal()
     try:
-        available_problems = db.query(Problem).filter(Problem.category.in_(db_categories)).all()
-        selected = random.sample(available_problems, 3) if len(available_problems) >= 3 else available_problems
-            
-        result = [
-            {
-                "id": p.id,
-                "category": p.category,
-                "question_text": p.question_text,
-                "image_path": p.image_path,
-                "detailed_solution": p.detailed_solution
-            } for p in selected
-        ]
+        final_selected = []
+        total_topics = len(db_categories)
+        if total_topics == 0:
+            return []
+
+        base_quota = 3 // total_topics
+        remainder = 3 % total_topics
+
+        for i, category in enumerate(db_categories):
+            quota = base_quota + (1 if i < remainder else 0)
+            if quota == 0:
+                continue
+            available_problems = db.query(Problem).filter(Problem.category == category).all()
+            if available_problems:
+                actual_quota = min(quota, len(available_problems))
+                selected = random.sample(available_problems, actual_quota)
+                final_selected.extend(selected)
+
+        result = [{"id": p.id, "category": p.category, "question_text": p.question_text, "image_path": p.image_path, "detailed_solution": p.detailed_solution} for p in final_selected]
+        random.shuffle(result)
         return result
     finally:
         db.close()
+
 
 @app.post("/grade_quiz")
 async def grade_quiz_endpoint(
@@ -212,24 +199,62 @@ async def grade_quiz_endpoint(
 ):
     try:
         answers_list = json.loads(answers)
-        for i, item in enumerate(answers_list):
-            file_obj = locals().get(f"file_{i}")
-            if file_obj:
-                img_bytes = await file_obj.read()
-                item['ocr_text'] = await process_qwen_ocr_only(img_bytes)
-            else:
-                item['ocr_text'] = "無上傳圖片"
         
-        streamer = process_quiz_grading(answers_list)
+        # 🛡️ 立即實體化圖片 (Safe Bytes) - 防止考卷第三題當機資料遺失
+        safe_file_bytes = []
+        for f in [file_0, file_1, file_2]:
+            if f and f.filename:
+                content = await f.read()
+                safe_file_bytes.append(content)
+            else:
+                safe_file_bytes.append(None)
         
         async def generate_wrapper():
             metadata = {"answer": "綜合批改完成", "translated_eq": "智慧測驗多模態混合閱卷", "plot": None}
             yield json.dumps(metadata) + "\n--SEP--\n"
-            for chunk in streamer:
-                if chunk:
-                    yield chunk
-                    await asyncio.sleep(0.01)
+            
+            for i, item in enumerate(answers_list):
+                chinese_num = ["一", "二", "三"][i]
+                yield f"### --- 第 {chinese_num} 題 ---\n"
+                yield f"**【題目】**：{item['question_text']}\n\n"
+                
+                # ----------------------------------------------------
+                # 第一步：呼叫眼睛 (OCR)
+                # ----------------------------------------------------
+                img_bytes = safe_file_bytes[i] if i < len(safe_file_bytes) else None
+                ocr_text = "無上傳圖片"
+                if img_bytes:
+                    yield "*🔍 正在仔細掃描您的手寫算式（絕不漏看）...*\n\n"
+                    ocr_text = await process_quiz_ocr(img_bytes)
+                    yield f"**【手寫辨識結果】**：\n{ocr_text}\n\n"
+                else:
+                    yield "**【手寫辨識結果】**：未上傳圖片\n\n"
+                
+                # ----------------------------------------------------
+                # 第二步：呼叫法官 (Judge)
+                # ----------------------------------------------------
+                yield "*⚖️ 老師正在嚴格判定對錯...*\n\n"
+                judge_result = await process_quiz_judge(
+                    item['question_text'], item['detailed_solution'], ocr_text, item['text_answer']
+                )
+                yield f"**【判定結果】**：{judge_result}\n\n"
+                
+                # ----------------------------------------------------
+                # 第三步：條件觸發導師 (Explain) - 只有錯才啟動
+                # ----------------------------------------------------
+                if "0分" in judge_result or "0" in judge_result:
+                    yield "*📝 診斷錯誤原因與詳細教學...*\n\n"
+                    streamer = process_quiz_explain(
+                        item['question_text'], item['detailed_solution'], ocr_text, item['text_answer']
+                    )
+                    for chunk in streamer:
+                        if chunk:
+                            yield chunk
+                            await asyncio.sleep(0.01)
+                
+                yield "\n\n<br><br>\n\n"
 
         return StreamingResponse(generate_wrapper(), media_type="text/plain")
     except Exception as e:
+        print(f"❌ 發生異常: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

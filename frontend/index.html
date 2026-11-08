@@ -164,6 +164,7 @@
         showPage('log');
         const res = await fetch(`http://127.0.0.1:8000/get_history/${loggedInUser}`);
         const data = await res.json();
+        // 學習日誌：全部印出，包含考卷紀錄
         document.getElementById('logContent').innerHTML = data.reverse().map(h => {
             const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
             return `
@@ -185,12 +186,19 @@
         const res = await fetch(`http://127.0.0.1:8000/get_history/${loggedInUser}`);
         const data = await res.json();
         
-        document.getElementById('quizHistoryList').innerHTML = data.reverse().map((h, index) => {
+        // 🛡️ 過濾器：濾掉所有「智慧測驗批改」，讓它們不要出現在出題勾選清單
+        const filteredData = data.filter(h => h.query !== "【智慧測驗批改】");
+        
+        document.getElementById('quizHistoryList').innerHTML = filteredData.reverse().map((h, index) => {
             const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
             
-            // ⚠️ 極簡版抓取：直接找「單元分類：」後面的字
-            const match = h.explanation.match(/單元分類：(.*)/);
-            const extractCategory = match ? match[1].trim() : "無法辨識單元";
+            let extractCategory = "無法辨識單元";
+            if (h.explanation) {
+                const match = h.explanation.match(/單元分類：\s*([^\n]+)/);
+                if (match && match[1]) {
+                    extractCategory = match[1].replace(/\*/g, '').trim(); 
+                }
+            }
 
             return `
             <div class="form-check p-3 mb-3 bg-white rounded shadow-sm border">
@@ -250,7 +258,7 @@
         }
         formData.append("answers", JSON.stringify(answersArray));
         showPage('result'); document.getElementById('loader').style.display = 'block';
-        document.getElementById('explanationText').innerText = "AI 老師正在用心閱卷中，包含您的手寫計算過程照片...\n\n";
+        document.getElementById('explanationText').innerText = "AI 老師正在九步驟嚴謹運算中，這可能需要一點時間...\n\n";
         
         const res = await fetch("http://127.0.0.1:8000/grade_quiz", { method: 'POST', body: formData });
         await handleStream(res, "【智慧測驗批改】");
