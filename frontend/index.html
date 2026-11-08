@@ -265,13 +265,16 @@ async function loadQuizHistory() {
 
         // 💡 調整重點：為文字、答案框、檔案框加上帶有唯一索引 [i] 的 id 屬性
         document.getElementById('quizQuestionsArea').innerHTML = questions.map((q, i) => `
-            <div class="quiz-card" id="qcard_${i}">
-                <div class="quiz-meta">${q.category}</div>
-                <p class="fs-5" id="quiz_q_${i}">${q.question_text}</p>
-                <textarea class="form-control mb-2" id="quiz_ans_${i}" rows="3" placeholder="請在此輸入您的計算過程與答案..."></textarea>
-                <input type="file" class="form-control form-control-sm text-secondary" id="quiz_file_${i}" accept="image/*">
-            </div>
-        `).join('');
+    <div class="quiz-card" id="qcard_${i}">
+        <div class="quiz-meta">${q.category}</div>
+        <p class="fs-5" id="quiz_q_${i}">${q.question_text}</p>
+        <textarea class="form-control mb-2" id="quiz_ans_${i}" rows="3" placeholder="請在此輸入您的計算過程與答案..."></textarea>
+        <input type="file" class="form-control form-control-sm text-secondary" id="quiz_file_${i}" accept="image/*">
+        
+        <!-- ⚠️ 將資料庫的標準詳解隱藏在頁面中，準備回傳 -->
+        <input type="hidden" id="quiz_sol_${i}" value="${q.detailed_solution || '無標準詳解'}">
+    </div>
+`).join('');
 
         document.getElementById('quiz-step-2').style.display = 'block';
         document.getElementById('quizSubmitBtn').style.display = 'block';
@@ -286,21 +289,21 @@ async function loadQuizHistory() {
         
         // 逐一掃描考卷卡片，打包文字與真實圖片檔案
         for (let i = 0; i < cards.length; i++) {
-            const qText = document.getElementById(`quiz_q_${i}`).innerText;
-            const ansText = document.getElementById(`quiz_ans_${i}`).value;
-            const fileInput = document.getElementById(`quiz_file_${i}`);
-            
-            // 收集文字骨架
-            answersArray.push({
-                question_text: qText,
-                text_answer: ansText
-            });
-            
-            // 檢查若此題有選擇圖片，則將其附加進 Form 欄位中 (對應後端的 file_0, file_1, file_2)
-            if (fileInput && fileInput.files[0]) {
-                formData.append(`file_${i}`, fileInput.files[0]);
-            }
-        }
+    const qText = document.getElementById(`quiz_q_${i}`).innerText;
+    const ansText = document.getElementById(`quiz_ans_${i}`).value;
+    const solText = document.getElementById(`quiz_sol_${i}`).value; // ⚠️ 抓取詳解
+    const fileInput = document.getElementById(`quiz_file_${i}`);
+    
+    answersArray.push({
+        question_text: qText,
+        detailed_solution: solText, // ⚠️ 一併打包送回後端
+        text_answer: ansText
+    });
+    
+    if (fileInput && fileInput.files[0]) {
+        formData.append(`file_${i}`, fileInput.files[0]);
+    }
+}
         
         // 將文字矩陣轉成字串塞入
         formData.append("answers", JSON.stringify(answersArray));

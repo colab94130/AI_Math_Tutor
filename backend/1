@@ -7,3 +7,8 @@ set PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True && python -m uvicorn backend.main
 source venv/bin/activate
 
 python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+
+1.看：檢查狀態 (確認沒有夾帶怪東西)：這一步是為了讓你安心。執行後，被修改的程式碼會顯示為紅色，而那個肥大的 model/ 資料夾絕對不會出現在名單上。Bash git status
+2.抓：將所有變更加入暫存區：因為 .gitignore 已經幫你擋掉地雷了，所以你可以大膽地使用 .（代表當前目錄下的所有檔案），把修改過的東西一次抓起來。Bash git add .
+3.包：打包並寫下更新日誌：為這次的修改寫一句簡單的備註，這能幫助你未來回顧專案的開發歷史。Bash git commit -m "完成 FastAPI 架構更新與路由優化"
+4.丟：推送到 GitHub 雲端：最後一步，將打包好的更新推送到 GitHub 的 main 主分支上。Bash git push origin main

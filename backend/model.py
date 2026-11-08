@@ -99,84 +99,119 @@ model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
     device_map="auto"
 )
 
-# 一般解題使用的單圖文管線
-def process_with_qwen_vl(image_bytes=None, text_query=None):
+# ================= 前方 load_model 等設定保留不變 =================
+
+# 新增一個非同步的純文字生成器，用來在背景取得第一層與第二層的結果
+async def _generate_text_async(messages, content_list):
+    streamer = _run_streamer(messages, content_list)
+    result = ""
+    for chunk in streamer:
+        if chunk:
+            result += chunk
+            await asyncio.sleep(0.001)
+    return result.strip()
+
+# ---------------------------------------------------------
+# [第一層]：純淨手寫 OCR (無情的打字機，防腦補)
+# ---------------------------------------------------------
+async def process_qwen_ocr_only(image_bytes):
     system_content = (
-        "你是一位專業的台灣國中數學老師。請『絕對、務必』全程使用『繁體中文（zh-TW）』作答，嚴禁出現任何簡體字！\n"
-        "你可以自由使用 Markdown 排版（例如標題、粗體、列表）來讓解題步驟更清晰。\n"
+        "你是一個極度精準的 OCR 數學算式辨識引擎。\n"
+        "【嚴格警告】：這是一張學生的手寫算式，學生『極有可能寫錯或漏寫』！\n"
+        "請『一字不漏、照實』轉譯圖片中的所有數學式子與符號。\n"
+        "絕對不要用你的數學邏輯去「腦補」或「自動修正」錯誤的算式！錯的就讓它是錯的。\n"
+        "所有數學式與數字必須使用 LaTeX 格式，單行算式用 $ 包裹，獨立大算式用 $$ 包裹。\n"
+        "嚴禁給出任何解答、提示或計算過程，你只需要純粹輸出辨識到的內容。"
+    )
+    messages = [{"role": "system", "content": system_content}]
+    content_list = []
+    
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    max_size = 1024
+    if max(image.size) > max_size:
+        image.thumbnail((max_size, max_size))
+        
+    content_list.append({"type": "image", "image": image})
+    content_list.append({"type": "text", "text": "請精準照實轉譯圖片內容。"})
+    messages.append({"role": "user", "content": content_list})
+    
+    return await _generate_text_async(messages, content_list)
+
+# ---------------------------------------------------------
+# [第二層]：單元分類大腦 (利用 Token 餘裕加上小抄)
+# ---------------------------------------------------------
+async def process_classification(extracted_text):
+    system_content = (
+        "你是一個專業的台灣中學數學單元分類器。\n"
+        f"請參考以下索引小抄來輔助分類：\n{MATH_CHEAT_SHEET}\n\n"
+        "請根據學生輸入的算式或題目，判斷其屬於哪一個單元。\n"
+        "你只需要輸出結果，絕對不要輸出其他多餘的字。\n"
+        "輸出格式必須為：「**本題屬於：[章節名稱]**」。"
+    )
+    messages = [{"role": "system", "content": system_content}]
+    content_list = [{"type": "text", "text": f"題目內容：\n{extracted_text}"}]
+    messages.append({"role": "user", "content": content_list})
+    
+    return await _generate_text_async(messages, content_list)
+
+# ---------------------------------------------------------
+# [第三層]：邏輯推演與詳解 (串流回傳給前端)
+# ---------------------------------------------------------
+def process_explanation(extracted_text, category_text):
+    system_content = (
+        "你是一位專業的台灣國中數學老師。請『絕對、務必』全程使用『繁體中文（zh-TW）』作答。\n"
         "【排版與數學符號嚴格規定】：\n"
-        "1. 所有的數字、未知數與數學算式，請『絕對』使用單一 $ 符號包裹（例如將 $x$ 代入 $5y$）。若需獨立成行的大算式，才使用 $$ 包裹。\n"
-        "2. 【嚴禁使用電腦程式符號，全面使用標準 LaTeX 數學符號】：\n"
-        "   - 平方：嚴禁寫 x**2，務必寫成 $x^2$。\n"
-        "   - 分數：嚴禁使用斜線 (如 x/2)，務必寫成 $\\frac{x}{2}$。\n"
-        "   - 根號：嚴禁寫 sqrt(2)，務必寫成 $\\sqrt{2}$。\n"
-        "   - 乘法與除法：嚴禁使用 * 或 /，務必使用 $\\times$ 或 $\\div$（或直接省略如 $3x$）。\n"
-        f"請參考以下索引來輔助你分類與避錯：\n{MATH_CHEAT_SHEET}"
+        "1. 所有的數字、未知數與數學算式，請『絕對』使用單一 $ 符號包裹。\n"
+        "2. 嚴禁使用電腦程式符號，全面使用標準 LaTeX 數學符號。\n"
     )
     
+    user_prompt = f"AI 單元預先判斷：{category_text}\n\n學生上傳的題目內容如下：\n{extracted_text}\n\n請給出精確答案與詳細且溫柔的解題步驟。"
     messages = [{"role": "system", "content": system_content}]
-    
-    content_list = []
-    if image_bytes:
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        max_size = 1024
-        if max(image.size) > max_size:
-            image.thumbnail((max_size, max_size))
-        content_list.append({"type": "image", "image": image})
-        
-    user_prompt = text_query if text_query else "請辨識這張圖片中的數學題，並給出精確答案與詳細解題步驟。"
-    content_list.append({"type": "text", "text": user_prompt})
+    content_list = [{"type": "text", "text": user_prompt}]
     messages.append({"role": "user", "content": content_list})
     
     return _run_streamer(messages, content_list)
 
-# 專門處理多題、多圖文混合的智慧測驗批改管線
-def process_quiz_grading(answers_list, images_dict):
-    # 4. 將小抄注入智慧測驗批改的 System Prompt
+# ---------------------------------------------------------
+# [智慧測驗]：多圖文批改 (帶入資料庫詳解與計分機制)
+# ---------------------------------------------------------
+def process_quiz_grading(answers_list):
     system_content = (
-        "你是一位條理分明的台灣國中數學老師。請幫忙逐題批改學生的測驗。\n"
-        "請『絕對、務必』全程使用『繁體中文（zh-TW）』作答，嚴禁出現任何簡體字。\n"
-       
-        "請嚴格遵守以下規則：\n"
-        "1. 每一題都是獨立的，請分開批改。若該題學生未作答且無圖片，請直接講評「未作答」。\n"
+        "你是一位嚴格且細心的台灣國中數學老師。請幫忙逐題批改學生的測驗。\n"
+        "請『絕對、務必』全程使用『繁體中文（zh-TW）』作答。\n"
+        f"【單元索引小抄】：\n{MATH_CHEAT_SHEET}\n\n"
+        "【批改嚴格規則】：\n"
+        "1. 每一題都是獨立的。請根據我提供的「題目」與「標準詳解」，來對比學生的「文字作答」與「圖片辨識結果」。\n"
         "2. 批改格式請務必依照：\n"
-        "題目一\n"
-        "（題目內容）\n"
-        "學生回答：（文字作答與圖片狀況）\n"
-        "開始講解：（具體批改與提示）\n\n"
-        f"請參考以下索引來精準抓出學生盲點並避錯：\n{MATH_CHEAT_SHEET}\n"
-        "請依序完成所有題目的批改，不要重複輸出無意義的邊界符號。"
+        "   **單元分類**：(從索引中選出此題單元)\n"
+        "   **題目**：(題目內容)\n"
+        "   **開始講解**：(具體批改與提示)\n"
+        "   **得分**：若學生觀念與答案完全正確，請在該題最後一行加上『+ 20分』；若錯誤或未作答，請加上『+ 0分』。\n"
     )
     
-    messages = [{"role": "system", "content": system_content}]
-    
-    content_list = []
-    
+    content = ""
     for i, item in enumerate(answers_list):
         chinese_num = ["一", "二", "三", "四", "五"][i]
-        
-        content_list.append({
-            "type": "text", 
-            "text": f"\n\n這是第 {chinese_num} 題的資料：\n題目：{item['question_text']}\n學生輸入的文字：{item['text_answer'] or '無'}\n學生的圖片狀況："
-        })
-        
-        if i in images_dict and images_dict[i]:
-            try:
-                img = Image.open(io.BytesIO(images_dict[i])).convert("RGB")
-                if max(img.size) > 1024:
-                    img.thumbnail((1024, 1024))
-                content_list.append({"type": "text", "text": "有提供圖片，請看圖。\n"})
-                content_list.append({"type": "image", "image": img})
-            except Exception as e:
-                print(f"解析第 {i+1} 題圖片失敗: {e}")
-                content_list.append({"type": "text", "text": "檔案損毀。\n"})
-        else:
-            content_list.append({"type": "text", "text": "學生沒有上傳本題的圖片。\n"})
-            
-    content_list.append({"type": "text", "text": "\n請開始你的批改："})
+        content += f"\n\n--- 第 {chinese_num} 題 ---\n"
+        content += f"題目：{item['question_text']}\n"
+        content += f"標準詳解：{item['detailed_solution']}\n"
+        content += f"學生輸入文字：{item['text_answer'] or '無'}\n"
+        content += f"學生圖片辨識結果：{item.get('ocr_text', '無上傳圖片')}\n"
+    
+    content += "\n\n請開始你的嚴格批改，並記得給分與單元分類："
+    
+    messages = [{"role": "system", "content": system_content}]
+    content_list = [{"type": "text", "text": content}]
     messages.append({"role": "user", "content": content_list})
     
+    # 這裡因為前面已經將圖片轉成 OCR 文字，所以不傳送真實圖片給模型，大幅節省算力並避免多圖干擾！
     return _run_streamer(messages, content_list)
+
+# ================= 內部封裝的發送生成器 _run_streamer 保留不變 =================
+def _run_streamer(messages, content_list):
+    text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    image_list = [img["image"] for img in content_list if img["type"] == "image"]
+    # ... (下方代碼與你原本的完全相同，省略)
 
 # 內部封裝的發送生成器
 def _run_streamer(messages, content_list):
