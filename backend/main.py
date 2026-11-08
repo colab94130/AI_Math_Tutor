@@ -11,8 +11,7 @@ from contextlib import asynccontextmanager # ⚠️ 新增這行
 from sqladmin import Admin, ModelView
 from .database import engine, Problem, SessionLocal
 # ⚠️ 注意這裡：多匯入了 load_model
-from .model import process_qwen_ocr_only, process_classification, process_explanation, process_quiz_grading, load_model
-
+from .model import process_qwen_ocr_only, process_explanation, process_classification, process_quiz_grading, load_model
 # ⚠️ 定義啟動生命週期：伺服器啟動時優先載入 AI 模型
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -108,26 +107,43 @@ async def get_history(username: str):
 @app.post("/solve")
 async def solve_endpoint(data: dict = Body(...)):
     query = data.get("query")
-    # 純文字輸入：跳過 OCR，直接分類 -> 解題
-    category_text = await process_classification(query)
-    streamer = process_explanation(query, category_text)
+    
+    # ⚠️ 直接啟動解題大腦，不給任何分類干擾
+    print("📝 [純文字呼叫一] 啟動無干擾邏輯推演...")
+    streamer = process_explanation(query) 
     
     async def generate_wrapper():
-        metadata = {"answer": "請看下方老師詳解", "translated_eq": f"【{category_text}】\n輸入/情境：{query[:30]}...", "plot": None}
+        # 1. 先回傳題目與預設文字給前端（此時還不知道分類）
+        metadata = {
+            "answer": "請看下方老師詳解", 
+            "translated_eq": "輸入/情境：" + query[:30] + "...", 
+            "plot": None,
+            "image_url": "" 
+        }
         yield json.dumps(metadata) + "\n--SEP--\n"
+        
+        # 2. 串流輸出詳解過程
         for chunk in streamer:
             if chunk:
                 yield chunk
                 await asyncio.sleep(0.01)
+                
+        # 3. 詳解吐完後，才啟動單元分類
+        yield "\n\n---\n*🔍 正在進行單元分析...*\n"
+        print("🧠 [純文字呼叫二] 啟動單元分類...")
+        category_text = await process_classification(query)
+        yield category_text
                 
     return StreamingResponse(generate_wrapper(), media_type="text/plain")
 
 @app.post("/ocr_solve")
 async def ocr_solve_endpoint(file: UploadFile = File(...)):
     try:
+        # ... (前方儲存圖片邏輯保留) ...
         file_extension = file.filename.split(".")[-1]
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        file_path = os.path.join(UPLOAD_DIR, f"upload_{timestamp}.{file_extension}")
+        unique_filename = f"upload_{timestamp}.{file_extension}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
         
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -135,29 +151,33 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         with open(file_path, "rb") as f:
             image_content = f.read()
             
-        # 🌟 三層式架構啟動！
-        print("🔍 [層級一] 純淨手寫 OCR...")
+        print("🔍 [呼叫一] 啟動純淨手寫 OCR...")
         extracted_latex = await process_qwen_ocr_only(image_content)
         
-        print("🧠 [層級二] 單元分類...")
-        category_text = await process_classification(extracted_latex)
-        
-        print("📝 [層級三] 邏輯推演生成...")
-        streamer = process_explanation(extracted_latex, category_text)
+        print("📝 [呼叫二] 啟動無干擾邏輯推演...")
+        streamer = process_explanation(extracted_latex)
         
         async def generate_wrapper():
-            # 將單元分類與 OCR 算式先回傳給畫面
+            # 1. 先回傳 OCR 算式給前端
             metadata = {
                 "answer": "", 
-                "translated_eq": f"{category_text}\n【辨識算式】\n{extracted_latex}", 
+                "translated_eq": "【辨識算式】\n" + extracted_latex, 
                 "plot": None,
-                "image_url": f"/{file_path}"
+                "image_url": "/" + file_path
             }
             yield json.dumps(metadata) + "\n--SEP--\n"
+            
+            # 2. 串流輸出詳解
             for chunk in streamer:
                 if chunk:
                     yield chunk
                     await asyncio.sleep(0.01)
+            
+            # 3. 詳解結束後，進行第三次呼叫（分類）
+            yield "\n\n---\n*🔍 正在進行單元分析...*\n"
+            print("🧠 [呼叫三] 啟動單元分類...")
+            category_text = await process_classification(extracted_latex)
+            yield category_text
 
         return StreamingResponse(generate_wrapper(), media_type="text/plain")
     except Exception as e:

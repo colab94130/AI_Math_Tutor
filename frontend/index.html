@@ -232,18 +232,33 @@ async function loadQuizHistory() {
         const data = await res.json();
         
         document.getElementById('quizHistoryList').innerHTML = data.reverse().map((h, index) => {
-             const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
-             return `
-            <div class="form-check p-3 mb-3 bg-white rounded shadow-sm border">
-                <input class="form-check-input ms-1 mt-2" type="checkbox" value="國一下-1-1重點一" id="hist_${index}" style="transform: scale(1.5);">
-                <label class="form-check-label ms-3 w-100" for="hist_${index}">
-                    <div class="quiz-meta">歷史提問</div>
-                    <div class="mt-1 text-dark">${h.query.substring(0, 50)}${h.query.length > 50 ? '...' : ''}</div>
-                    ${imgHtml}
-                </label>
-            </div>
-            `;
-        }).join('');
+        const imgHtml = h.image_url ? `<div class="mt-2"><img src="http://127.0.0.1:8000${h.image_url}" class="history-thumbnail" onclick="showFullImage(this.src)"></div>` : '';
+        
+        // 🔍 字串定位擷取法：從歷史紀錄中尋找分類關鍵字
+        let extractCategory = "國二上-1-1-乘法公式"; // 預設值
+        const targetStr = "本題屬於：";
+        const idx = h.explanation.indexOf(targetStr);
+        
+        if (idx !== -1) {
+            // 擷取「本題屬於：」後面的所有字
+            let cat = h.explanation.substring(idx + targetStr.length);
+            // 砍掉斷行，並把 Markdown 的星星 (**) 清除乾淨
+            cat = cat.split('\n')[0].replace(/\*/g, '').trim();
+            if (cat) extractCategory = cat;
+        }
+
+        return `
+        <div class="form-check p-3 mb-3 bg-white rounded shadow-sm border">
+            <!-- ⚠️ 將乾淨的分類名稱綁定到 checkbox -->
+            <input class="form-check-input ms-1 mt-2" type="checkbox" value="${extractCategory}" id="hist_${index}" style="transform: scale(1.5);">
+            <label class="form-check-label ms-3 w-100" for="hist_${index}">
+                <div class="quiz-meta">${extractCategory}</div>
+                <div class="mt-1 text-dark">${h.query.substring(0, 50)}${h.query.length > 50 ? '...' : ''}</div>
+                ${imgHtml}
+            </label>
+        </div>
+        `;
+    }).join('');
         
         renderMath();
     }

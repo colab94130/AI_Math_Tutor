@@ -1,7 +1,7 @@
 import os
 # 1. 強制設定 Hugging Face 模型下載與快取路徑至 E 槽 (必須在 import transformers 前執行)
 os.environ["HF_HOME"] = "/home/nic0/HF_Models"
-
+import asyncio
 import torch
 import io
 from PIL import Image
@@ -110,19 +110,18 @@ async def _generate_text_async(messages, content_list):
             result += chunk
             await asyncio.sleep(0.001)
     return result.strip()
-
 # ---------------------------------------------------------
-# [第一層]：純淨手寫 OCR (無情的打字機，防腦補)
+# [第一次呼叫]：純淨手寫 OCR (無情的打字機)
 # ---------------------------------------------------------
 async def process_qwen_ocr_only(image_bytes):
     system_content = (
         "你是一個極度精準的 OCR 數學算式辨識引擎。\n"
         "【嚴格警告】：這是一張學生的手寫算式，學生『極有可能寫錯或漏寫』！\n"
         "請『一字不漏、照實』轉譯圖片中的所有數學式子與符號。\n"
-        "絕對不要用你的數學邏輯去「腦補」或「自動修正」錯誤的算式！錯的就讓它是錯的。\n"
-        "所有數學式與數字必須使用 LaTeX 格式，單行算式用 $ 包裹，獨立大算式用 $$ 包裹。\n"
+        "絕對不要用你的數學邏輯去自動修正錯誤的算式！錯的就讓它是錯的。\n"
         "嚴禁給出任何解答、提示或計算過程，你只需要純粹輸出辨識到的內容。"
     )
+    # ... (下方與之前相同，保留你的 OCR 處理邏輯) ...
     messages = [{"role": "system", "content": system_content}]
     content_list = []
     
@@ -138,13 +137,31 @@ async def process_qwen_ocr_only(image_bytes):
     return await _generate_text_async(messages, content_list)
 
 # ---------------------------------------------------------
-# [第二層]：單元分類大腦 (利用 Token 餘裕加上小抄)
+# [第二次呼叫]：邏輯推演與詳解 (不受分類干擾)
+# ---------------------------------------------------------
+def process_explanation(extracted_text):
+    system_content = (
+        "你是一位專業的台灣國中數學老師。請『絕對、務必』全程使用『繁體中文（zh-TW）』作答。\n"
+        "【排版與數學符號嚴格規定】：\n"
+        "1. 所有的數字、未知數與數學算式，請『絕對』使用單一 $ 符號包裹。\n"
+        "2. 嚴禁使用電腦程式符號，全面使用標準 LaTeX 數學符號。\n"
+    )
+    # ⚠️ 這裡不再傳入分類！讓模型看著純淨的 OCR 直接解題
+    user_prompt = f"學生上傳的題目內容如下：\n{extracted_text}\n\n請給出精確答案與詳細且溫柔的解題步驟。"
+    messages = [{"role": "system", "content": system_content}]
+    content_list = [{"type": "text", "text": user_prompt}]
+    messages.append({"role": "user", "content": content_list})
+    
+    return _run_streamer(messages, content_list)
+
+# ---------------------------------------------------------
+# [第三次呼叫]：單元分類大腦 (解完題再來分類)
 # ---------------------------------------------------------
 async def process_classification(extracted_text):
     system_content = (
         "你是一個專業的台灣中學數學單元分類器。\n"
         f"請參考以下索引小抄來輔助分類：\n{MATH_CHEAT_SHEET}\n\n"
-        "請根據學生輸入的算式或題目，判斷其屬於哪一個單元。\n"
+        "請根據學生輸入的算式，判斷其屬於哪一個單元。\n"
         "你只需要輸出結果，絕對不要輸出其他多餘的字。\n"
         "輸出格式必須為：「**本題屬於：[章節名稱]**」。"
     )
@@ -154,23 +171,7 @@ async def process_classification(extracted_text):
     
     return await _generate_text_async(messages, content_list)
 
-# ---------------------------------------------------------
-# [第三層]：邏輯推演與詳解 (串流回傳給前端)
-# ---------------------------------------------------------
-def process_explanation(extracted_text, category_text):
-    system_content = (
-        "你是一位專業的台灣國中數學老師。請『絕對、務必』全程使用『繁體中文（zh-TW）』作答。\n"
-        "【排版與數學符號嚴格規定】：\n"
-        "1. 所有的數字、未知數與數學算式，請『絕對』使用單一 $ 符號包裹。\n"
-        "2. 嚴禁使用電腦程式符號，全面使用標準 LaTeX 數學符號。\n"
-    )
-    
-    user_prompt = f"AI 單元預先判斷：{category_text}\n\n學生上傳的題目內容如下：\n{extracted_text}\n\n請給出精確答案與詳細且溫柔的解題步驟。"
-    messages = [{"role": "system", "content": system_content}]
-    content_list = [{"type": "text", "text": user_prompt}]
-    messages.append({"role": "user", "content": content_list})
-    
-    return _run_streamer(messages, content_list)
+# ... (其餘保留不變) ...
 
 # ---------------------------------------------------------
 # [智慧測驗]：多圖文批改 (帶入資料庫詳解與計分機制)
