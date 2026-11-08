@@ -5,14 +5,12 @@ import json, os, asyncio, random
 from datetime import datetime
 from typing import Optional
 import shutil
-from contextlib import asynccontextmanager # ⚠️ 新增這行
+from contextlib import asynccontextmanager
 
-# 匯入 SQLAdmin 與資料庫模組
 from sqladmin import Admin, ModelView
 from .database import engine, Problem, SessionLocal
-# ⚠️ 注意這裡：多匯入了 load_model
 from .model import process_qwen_ocr_only, process_explanation, process_classification, process_quiz_grading, load_model
-# ⚠️ 定義啟動生命週期：伺服器啟動時優先載入 AI 模型
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("🌟 伺服器啟動中，準備喚醒數學家教 AI...")
@@ -20,36 +18,25 @@ async def lifespan(app: FastAPI):
     yield
     print("💤 伺服器關閉中...")
 
-# ⚠️ 將 lifespan 綁定到 app
 app = FastAPI(lifespan=lifespan)
 
 from fastapi.staticfiles import StaticFiles
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# ================= 下方保留你原本的 app.add_middleware 與其他路由 =================
-
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
 )
 
-# 註冊 SQLAdmin 後台
 admin = Admin(app, engine)
-
 class ProblemAdmin(ModelView, model=Problem):
     column_list = [Problem.id, Problem.category, Problem.question_text, Problem.image_path]
     column_searchable_list = [Problem.category, Problem.question_text]
     name = "數學題庫"
     name_plural = "數學題庫管理"
     icon = "fa-solid fa-calculator"
-
 admin.add_view(ProblemAdmin)
 
-# ================= 會員與歷史紀錄功能 =================
 USER_FILE = "users.json"
-
 def load_users():
     if not os.path.exists(USER_FILE): return []
     with open(USER_FILE, "r", encoding="utf-8") as f:
@@ -84,12 +71,11 @@ async def save_history(data: dict = Body(...)):
     users = load_users()
     for u in users:
         if u['username'] == data.get("username"):
-            # 接收前端傳來的 image_url
             history_entry = {
                 "query": data.get("query", ""),
                 "answer": data.get("answer", ""),
                 "explanation": data.get("explanation", ""),
-                "image_url": data.get("image_url", ""), # 新增圖片路徑欄位
+                "image_url": data.get("image_url", ""),
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             u['history'].append(history_entry)
@@ -107,13 +93,9 @@ async def get_history(username: str):
 @app.post("/solve")
 async def solve_endpoint(data: dict = Body(...)):
     query = data.get("query")
-    
-    # ⚠️ 直接啟動解題大腦，不給任何分類干擾
-    print("📝 [純文字呼叫一] 啟動無干擾邏輯推演...")
     streamer = process_explanation(query) 
     
     async def generate_wrapper():
-        # 1. 先回傳題目與預設文字給前端（此時還不知道分類）
         metadata = {
             "answer": "請看下方老師詳解", 
             "translated_eq": "輸入/情境：" + query[:30] + "...", 
@@ -121,25 +103,20 @@ async def solve_endpoint(data: dict = Body(...)):
             "image_url": "" 
         }
         yield json.dumps(metadata) + "\n--SEP--\n"
-        
-        # 2. 串流輸出詳解過程
         for chunk in streamer:
             if chunk:
                 yield chunk
                 await asyncio.sleep(0.01)
                 
-        # 3. 詳解吐完後，才啟動單元分類
-        yield "\n\n---\n*🔍 正在進行單元分析...*\n"
-        print("🧠 [純文字呼叫二] 啟動單元分類...")
         category_text = await process_classification(query)
-        yield category_text
+        # ⚠️ 直接輸出「單元分類：01 乘法公式」
+        yield f"\n\n---\n單元分類：{category_text}"
                 
     return StreamingResponse(generate_wrapper(), media_type="text/plain")
 
 @app.post("/ocr_solve")
 async def ocr_solve_endpoint(file: UploadFile = File(...)):
     try:
-        # ... (前方儲存圖片邏輯保留) ...
         file_extension = file.filename.split(".")[-1]
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         unique_filename = f"upload_{timestamp}.{file_extension}"
@@ -151,14 +128,10 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         with open(file_path, "rb") as f:
             image_content = f.read()
             
-        print("🔍 [呼叫一] 啟動純淨手寫 OCR...")
         extracted_latex = await process_qwen_ocr_only(image_content)
-        
-        print("📝 [呼叫二] 啟動無干擾邏輯推演...")
         streamer = process_explanation(extracted_latex)
         
         async def generate_wrapper():
-            # 1. 先回傳 OCR 算式給前端
             metadata = {
                 "answer": "", 
                 "translated_eq": "【辨識算式】\n" + extracted_latex, 
@@ -167,17 +140,13 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
             }
             yield json.dumps(metadata) + "\n--SEP--\n"
             
-            # 2. 串流輸出詳解
             for chunk in streamer:
                 if chunk:
                     yield chunk
                     await asyncio.sleep(0.01)
             
-            # 3. 詳解結束後，進行第三次呼叫（分類）
-            yield "\n\n---\n*🔍 正在進行單元分析...*\n"
-            print("🧠 [呼叫三] 啟動單元分類...")
             category_text = await process_classification(extracted_latex)
-            yield category_text
+            yield f"\n\n---\n單元分類：{category_text}"
 
         return StreamingResponse(generate_wrapper(), media_type="text/plain")
     except Exception as e:
@@ -185,12 +154,40 @@ async def ocr_solve_endpoint(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ================= 智慧出題 (Active Recall) =================
+# ⚠️ 將小抄名稱與資料庫真實名稱對應的字典
+CAT_MAPPING = {
+    "01": "國二上-1-1-乘法公式",
+    "02": "國二上-1-2-多項式的加減",
+    "03": "國二上-1-3-多項式的乘除",
+    "04": "國二上-2-1-平方根的意義",
+    "05": "國二上-2-2-根式的運算",
+    "06": "國二上-2-3-畢氏定理",
+    "07": "國二上-3-1-提公因式與乘法公式作因式分解",
+    "08": "國二上-3-2-利用十字交乘法因式分解",
+    "09": "國二上-4-1-因式分解法解一元二次方程式",
+    "10": "國二上-4-2-配方法與公式解",
+    "11": "國二上-4-3-應用問題"
+}
+
 @app.post("/generate_quiz")
 async def generate_quiz_endpoint(data: dict = Body(...)):
     _categories = data.get("categories", [])
+    
+    # 將前端傳來的 "01 乘法公式" 翻譯成資料庫的 "國二上-1-1-乘法公式"
+    db_categories = []
+    for c in _categories:
+        matched = False
+        for key, db_val in CAT_MAPPING.items():
+            if key in c:
+                db_categories.append(db_val)
+                matched = True
+                break
+        if not matched:
+            db_categories.append(c)
+
     db = SessionLocal()
     try:
-        available_problems = db.query(Problem).filter(Problem.category.in_(_categories)).all()
+        available_problems = db.query(Problem).filter(Problem.category.in_(db_categories)).all()
         selected = random.sample(available_problems, 3) if len(available_problems) >= 3 else available_problems
             
         result = [
@@ -199,7 +196,7 @@ async def generate_quiz_endpoint(data: dict = Body(...)):
                 "category": p.category,
                 "question_text": p.question_text,
                 "image_path": p.image_path,
-                "detailed_solution": p.detailed_solution # ⚠️ 新增回傳標準詳解給前端
+                "detailed_solution": p.detailed_solution
             } for p in selected
         ]
         return result
@@ -215,18 +212,14 @@ async def grade_quiz_endpoint(
 ):
     try:
         answers_list = json.loads(answers)
-        
-        # 🌟 將收到的學生考卷圖片，先交給防腦補的 OCR 引擎做初步轉譯
         for i, item in enumerate(answers_list):
             file_obj = locals().get(f"file_{i}")
             if file_obj:
                 img_bytes = await file_obj.read()
-                print(f"🔍 正在解析第 {i+1} 題的學生圖片...")
                 item['ocr_text'] = await process_qwen_ocr_only(img_bytes)
             else:
                 item['ocr_text'] = "無上傳圖片"
         
-        # 圖片已經轉成嚴格的算式字串，連同題庫詳解一起送給模型批改
         streamer = process_quiz_grading(answers_list)
         
         async def generate_wrapper():
@@ -239,5 +232,4 @@ async def grade_quiz_endpoint(
 
         return StreamingResponse(generate_wrapper(), media_type="text/plain")
     except Exception as e:
-        print(f"❌ 發生異常: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
